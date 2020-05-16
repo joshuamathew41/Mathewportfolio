@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Abraham Joshua Mathew" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>R and Python Can Work Together!</title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume.pdf">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/blog/r-and-python-can-work-together/">R and Python Can Work Together!</a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          May 15, 2020
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<p>R can work with python to achieve a variety of goals in convenient ways. For example, below is a short nucleotide sequence that we will define in R as “dnaseq”.</p>
+<pre class="r"><code>#this is a R code chunk
+library(reticulate)</code></pre>
+<pre><code>## Warning: package &#39;reticulate&#39; was built under R version 3.6.3</code></pre>
+<pre class="r"><code>dnaseq &lt;- &quot;ATGGCAATAACCCCCCGTTTCTACTTCTAGAGGAGAAAAGTATTGACATGAGCGCTCCCGGCACAAGGGCCAAAGAAGTCTCCAATTTCTTATTTCCGAATGACATGCGTCTCCTTGCGGGTAAATCACCGACCGCAATTCATAGAAGCCTGGGGGAACAGATAGGTCTAATTAGCTTAAGAGAGTAAATCCTGGGATCATTCAGTAGTAACCATAAACTTACGCTGGGCGCGCTTATAG&quot;
+
+
+#your code here</code></pre>
+<p>Using Python, we are able to determine the length of the sequence and save it as the variable “lon”. By dividing lon by three, we can determine that there are 80 codons contained within this sequence. After doing so, we will divide the following sequence into codons. Then, we can set up a While loop to assign each codon its corressponding amino acid.</p>
+<pre class="python"><code>#this is an python code chunk 
+import re
+lon = len(r.dnaseq)
+
+codon = []
+a, b  = 0, 3
+while  a &lt; lon:
+  codon.append(r.dnaseq[a:b])
+  a, b, = b, b+3
+
+codnames = []
+
+a = 0
+while a &lt; 80:
+  if codon[a] == &quot;TTC&quot; or codon[a] == &quot;TTT&quot;:
+    codnames.append(&quot;Phe&quot;)
+  elif codon[a] == &quot;CTT&quot; or codon[a] == &quot;CTC&quot; or codon[a] == &quot;TTA&quot; or codon[a] == &quot;TTG&quot; or codon[a] == &quot;CTA&quot; or codon[a] == &quot;CTG&quot;:
+    codnames.append(&quot;Leu&quot;)
+  elif codon[a] == &quot;ATT&quot; or codon[a] == &quot;ATC&quot; or codon[a] == &quot;ATA&quot;:
+    codnames.append(&quot;Ile&quot;)
+  elif codon[a] == &quot;GTT&quot; or codon[a] == &quot;GTC&quot; or codon[a] == &quot;GTA&quot;  or codon[a] == &quot;GTG&quot;:
+    codnames.append(&quot;Val&quot;)
+  elif codon[a] == &quot;ATG&quot;:
+    codnames.append(&quot;Met&quot;)
+  elif codon[a] == &quot;TCT&quot; or codon[a] == &quot;TCC&quot; or codon[a] == &quot;TCG&quot;  or codon[a] == &quot;TCA&quot;  or codon[a] == &quot;AGC&quot;  or codon[a] == &quot;AGT&quot;:
+    codnames.append(&quot;Ser&quot;)
+  elif codon[a] == &quot;CCT&quot; or codon[a] == &quot;CCC&quot; or codon[a] == &quot;CCA&quot;  or codon[a] == &quot;CCG&quot;:
+    codnames.append(&quot;Pro&quot;)
+  elif codon[a] == &quot;ACA&quot; or codon[a] == &quot;ACT&quot; or codon[a] == &quot;ACG&quot;  or codon[a] == &quot;ACC&quot;:
+    codnames.append(&quot;Thr&quot;)
+  elif codon[a] == &quot;GCA&quot; or codon[a] == &quot;GCT&quot; or codon[a] == &quot;GCC&quot;  or codon[a] == &quot;GCG&quot;:
+    codnames.append(&quot;Ala&quot;)
+  elif codon[a] == &quot;TAC&quot; or codon[a] == &quot;TAT&quot;:
+    codnames.append(&quot;Tyr&quot;)
+  elif codon[a] == &quot;CAC&quot; or codon[a] == &quot;CAT&quot;:
+    codnames.append(&quot;His&quot;)
+  elif codon[a] == &quot;CAG&quot;  or codon[a] == &quot;CAA&quot;:
+    codnames.append(&quot;Gln&quot;)
+  elif codon[a] == &quot;AAC&quot; or codon[a] == &quot;AAT&quot;:
+    codnames.append(&quot;Asn&quot;)
+  elif codon[a] == &quot;AAA&quot; or codon[a] == &quot;AAG&quot;:
+    codnames.append(&quot;Lys&quot;)
+  elif codon[a] == &quot;GAC&quot; or codon[a] == &quot;GAT&quot;:
+    codnames.append(&quot;Asp&quot;)
+  elif codon[a] == &quot;GAG&quot; or codon[a] == &quot;GAA&quot;:
+    codnames.append(&quot;Glu&quot;)
+  elif codon[a] == &quot;TGC&quot; or codon[a] == &quot;TGT&quot;:
+    codnames.append(&quot;Cys&quot;)
+  elif codon[a] == &quot;TGG&quot;:
+    codnames.append(&quot;Trp&quot;)
+  elif codon[a] == &quot;CGT&quot; or codon[a] == &quot;CGC&quot; or codon[a] == &quot;CGA&quot;  or codon[a] == &quot;CGG&quot; or codon[a] == &quot;AGA&quot;  or codon[a] == &quot;AGG&quot;:
+    codnames.append(&quot;Arg&quot;)
+  elif codon[a] == &quot;GGG&quot;  or codon[a] == &quot;GGA&quot;  or codon[a] == &quot;GGC&quot;  or codon[a] == &quot;GGT&quot;:
+    codnames.append(&quot;Gly&quot;)
+  a = a + 1 
+
+codnames</code></pre>
+<pre><code>## [&#39;Met&#39;, &#39;Ala&#39;, &#39;Ile&#39;, &#39;Thr&#39;, &#39;Pro&#39;, &#39;Arg&#39;, &#39;Phe&#39;, &#39;Tyr&#39;, &#39;Phe&#39;, &#39;Arg&#39;, &#39;Arg&#39;, &#39;Lys&#39;, &#39;Val&#39;, &#39;Leu&#39;, &#39;Thr&#39;, &#39;Ala&#39;, &#39;Leu&#39;, &#39;Pro&#39;, &#39;Ala&#39;, &#39;Gln&#39;, &#39;Gly&#39;, &#39;Pro&#39;, &#39;Lys&#39;, &#39;Lys&#39;, &#39;Ser&#39;, &#39;Pro&#39;, &#39;Ile&#39;, &#39;Ser&#39;, &#39;Tyr&#39;, &#39;Phe&#39;, &#39;Arg&#39;, &#39;Met&#39;, &#39;Thr&#39;, &#39;Cys&#39;, &#39;Val&#39;, &#39;Ser&#39;, &#39;Leu&#39;, &#39;Arg&#39;, &#39;Val&#39;, &#39;Asn&#39;, &#39;His&#39;, &#39;Arg&#39;, &#39;Pro&#39;, &#39;Gln&#39;, &#39;Phe&#39;, &#39;Ile&#39;, &#39;Glu&#39;, &#39;Ala&#39;, &#39;Trp&#39;, &#39;Gly&#39;, &#39;Asn&#39;, &#39;Arg&#39;, &#39;Val&#39;, &#39;Leu&#39;, &#39;Ala&#39;, &#39;Glu&#39;, &#39;Ser&#39;, &#39;Lys&#39;, &#39;Ser&#39;, &#39;Trp&#39;, &#39;Asp&#39;, &#39;His&#39;, &#39;Ser&#39;, &#39;Val&#39;, &#39;Val&#39;, &#39;Thr&#39;, &#39;Ile&#39;, &#39;Asn&#39;, &#39;Leu&#39;, &#39;Arg&#39;, &#39;Trp&#39;, &#39;Ala&#39;, &#39;Arg&#39;, &#39;Leu&#39;]</code></pre>
+<p>Finally, we can use R to generate a bar graph demonstrating the frequency of each amino acid in the sequence using R.</p>
+<pre class="r"><code>#This is an R code chunk.
+
+library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(ggplot2)
+codondata &lt;- py$codnames
+codondata &lt;- data.frame(table(codondata))
+ggplot(data=codondata, aes(x=codondata, y=Freq)) +
+  geom_bar(stat=&quot;identity&quot;, fill=&quot;steelblue&quot;)+
+  geom_text(aes(label=codondata), vjust=1.6, color=&quot;white&quot;, size=3.5)+
+  theme_minimal()</code></pre>
+<p><img src="/blog/2020-05-15-r-and-python-can-work-together_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+As one can see, integrating R and Python together can allow for the solution of complex problems that neither can do alone.</p>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,290 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Project 1: Exploratory Data Analysis
+#### author: Abraham Joshua Mathew
+#### uteid: ajm5874
+#### date: '3/16/20
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+### Introduction
+
+In this project, the dataset "babynames" was imported and combined with the dataset "unisex_names". By comparing these two datasets, it is possible to analyze the history of unisex names in america, including how common they are, the distribution of the names across sex, and their changes in popularity over the years. 
+
+For some background the dataset "babynames", it was provided by the social security administration and it contains all names with at least 5 uses from as early as 1880. The variables in this dataset include the individual's year of birth, the individual's name, their sex, the total number of individuals born in that year with the same name, and the proportion of individuals born with that name during the specific year when compared to the general population. 
+
+As for the dataset "unisex_names", it contains some of the most common unisex names in America.The variables it contains include information about the total number of living Americans with the name, the proportion of males who bear the name, the proportion of females who bear the name, and the gap between these proportions. 
+
+Before analyzing this dataset, it is unclear which associations will arise. There will be an an inverse correlation between male and female proportion because they are already known to be inversely related. However, beyond this, it is difficult to predict how these variables will interact. 
+
+To begin the analysis, the necessary packages were imported. Additionally, the two aforementioned datasets were assigned names within the local environment
+
+```{R}
+library(babynames)
+library(dplyr)
+library(tidyr)
+library(corrplot)
+library(reshape)
+library(reshape2)
+library(ggplot2)
+library(fivethirtyeight)
+library(formatR)
+
+namesbaby <- babynames
+uninames <- unisex_names
+```
+
+### Tidying and Merging the Datasets
+
+To begin the analysis, the datasets first need to be merged and tidied. After some deliberation, the two data sets were merged first, using an inner join by the variable "name" via the merge function. This join was perfect for the analysis at hand because it would allow for the preservation of all names common to both datasets. At the same time, it would also allow for the preservation of the variables necessary for later analysis. During this join, all observations that were not in the unisex dataset were dropped. This means that only unisex names remain. There should not be any significant problems with this. 
+
+Because the dataset was already tidy, no further tidying was required. However, combining the variables "name" and "sex" was attempted to provide an easier format for analysis. However, as the project continued, it was far more effective to leave these variables separated in order to identify each unique individual more easily.  
+
+```{r}
+
+fullnames <- merge(namesbaby,uninames)
+fullnamest <- fullnames %>% pivot_longer(c(name,sex), names_to = "name,sex", values_to = "sex")
+fullnamesu <- fullnamest %>% 
+pivot_wider(names_from = `name,sex`, values_from = sex)
+head(fullnamest)
+head(fullnamesu)
+```
+### Wrangling
+
+In order to determine the true total number of male and female individuals bearing each name during each year, the total and n columns were combined into one using the mutate function. This will provide a combined total of individuals based off of both datasets. The total and n columns were then removed using the select function. 
+
+```{r}
+
+fullnames2 <- fullnames %>% mutate(fulltotal = total + n)
+fullnames2 <- fullnames2 %>% select(-total,-n)
+glimpse(fullnames2)
+
+```
+
+Next, summary statistics were calculated for each variable grouped by each name. Additionally, the total number of unique names and observations were determined and placed in the table below. The processes used in R were performed using the code below: 
+
+```{r}
+cormat1 <- fullnames2 %>% select_if(is.numeric)
+
+fullnamesnum <- fullnames2  %>% select(name,year,prop,male_share, female_share, gap, fulltotal)
+
+fullnamesmean <- fullnamesnum %>% group_by(name) %>% summarize_all(mean)
+
+fullnamesmax <- fullnames2 %>% group_by(name) %>% summarize_all(max)
+
+
+#minimum was grouped by name and year
+fullnamesmin <-fullnames2 %>% group_by(name,year) %>% summarize_all(min)
+
+fullnamessd <- fullnamesnum %>% group_by(name) %>% summarize_all(sd)
+
+fullnamesvar <- fullnamesnum %>% group_by(name) %>% summarize_all(var)
+
+fullnamesmedian <- cormat1 %>% summarize_all(median)
+
+fullnamescount <- fullnames2 %>% group_by(name) %>% summarise(n())
+
+fullnamesdistinct <- fullnames2 %>% summarise_all(n_distinct)
+fullnamesdistinct
+
+#quantile table creation
+
+quantprp <- quantile(fullnames2$prop)
+quantmale <- quantile(fullnames2$male_share)
+quantfemale <- quantile(fullnames2$female_share)
+quanttotal <- quantile(fullnames2$fulltotal)
+quantgap <- quantile(fullnames2$gap)
+quantyear <- quantile(fullnames2$year)
+quanttable <- data.frame(quantprp)
+quanttable <- quanttable %>% mutate(prop = quantprp, male = quantmale, female = quantfemale, fulltotal = quanttotal, gap = quantgap, year = quantyear) %>% select(-quantprp)
+
+#correllation matrix creation
+cormat1 <- fullnames2 %>% select_if(is.numeric)
+
+cormat <- cor(cormat1)
+cormat2 <- data.frame(cormat)
+cormat2 <- round(cor(cormat),2)
+melted_cormat <- melt(cormat2)
+
+
+#Determine which names are majority men and which are majority women.
+
+Mennames <- fullnames2 %>% filter(male_share > 0.5)
+Womennames <- fullnames2 %>% filter(female_share > 0.5)
+mostmalename <- Mennames %>% arrange(!desc(male_share))
+
+mostfemalename <- Womennames %>% arrange(!desc(female_share))
+
+```
+
+Correlation Matrix:
+```{r}
+cormat2
+
+```
+Quantile table for each numeric variable (in order of 0%, 25%, 50%, 75%, 100%:
+```{r}
+quanttable
+
+```
+
+Maximum Values for each variable in each year gruped by name
+```{r}
+fullnamesmax
+
+```
+
+Means for each numeric variable grouped by name:
+```{r}
+fullnamesmean <- fullnamesmean %>% select(name,year,prop,male_share, female_share, gap, fulltotal)
+fullnamesmean
+```
+Total number of occurrances for each name and names with maximum occurances
+```{r}
+
+fullnamescount 
+fullnamescount[fullnamescount$`n()` == max(fullnamescount$`n()`),]
+```
+Total distinct values for each variable:
+```{r}
+fullnamesdistinct
+
+```
+Least number of occurrances for each name in each year and the least common names overall:
+```{r}
+fullnamesmin
+fullnamesmin[fullnamesmin$fulltotal == min(fullnamesmin$fulltotal),]
+```
+Median for each name for each numeric variable
+```{r}
+fullnamesmedian
+
+```
+Standard Deviation for each name in each numeric variable.
+```{r}
+fullnamessd <- fullnamessd  %>% select(name,year,prop,male_share, female_share, gap, fulltotal)
+
+fullnamessd
+```
+Variance in each numeric variable grouped by name: 
+```{r}
+fullnamesvar <- fullnamesvar  %>% select(name,year,prop,male_share, female_share, gap, fulltotal)
+
+fullnamesvar
+```
+Names with a majority male representation
+```{r}
+Mennames
+
+```
+
+Names with a majority female representation:
+
+```{r}
+Womennames
+```
+The Name with the greatest male representation can be determined using this table
+```{r}
+mostmalename
+```
+
+The Name with the greatest female representation can be determined using this table
+```{r}
+mostfemalename
+```
+Overall, based on a cursory analysis of this data and summary statistics, it appears that there are no significant findings. For example, according to the correlation matrix above, aside from male and female proportions being inversely related, there are no meaningful correlations. This is because all of the correllations shown are low. 
+
+However, this analysis is not completely pointless. Based on this data, it can be determined that Aaryn is the most common unisex female name and that Aalijah is the most common unisex male name. Additionally, it appears that there is very little variance in proportion between names. This indicates that all of the names are equally likely to be seen in the population. This is reasonable because there is a very large possible list of names to pick from. Additionally, there is no true advantage that having a certain name will grant. Finally based on this data, the most common unisex names overall wwere Jessie, Ollie, and Tommie.  In direct contrast, the least common name was Aeon. Although there are some interesting findings in this data, it appears, based on early analysis, that associations between the variables measured are not among them. To clarify and illustrate  this, the data was visualized.  
+
+### Visualization
+
+To further analyze this data, a correlation heat map was created using the code below
+
+```{r}
+
+#generation of the correlation heatmap.
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value))+
+ geom_tile(color = "white")+
+ scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+   midpoint = 0, limit = c(-1,1), space = "Lab", 
+   name="Correlation") +
+  theme_minimal()+ 
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, 
+    size = 12, hjust = 1))+
+ coord_fixed() +geom_text(aes(label=round(value,2))) +ggtitle("Correlation Heatmap")
+
+
+```
+
+Based on this heat map and the correlation matrix depicted above, It is clear that there is no significant correlation between most of the variables. The strongest correlation appears between male and female proportion. However, this is not relevant correlation because these two proportions are inversely related due to the binary nature of biological sex in human beings. The other significant correlation occurs between the proportion of a unisex name in the population (prop) and the total number of unisex named individuals in the population (fulltotal). This is expected because thise two variables are directly related. To elaborate, as the total number of unisex named individuals rises, their proportion in the total population also rises. Therefore, this correlation is not relevant either.    
+
+Next, a jitterplot was created to better visualize the effect that time has on the total number of individuals with unisex names.To better visualize this data, a random sample of 5oo was taken from the larger data to be used for this graph. If the whole dataset were used, the graph would be illegible.
+```{r}
+
+smalldata1 <- fullnames2 %>% sample_n(500) 
+
+#jitterplot creation
+jplot <- ggplot(smalldata1, aes(year, fulltotal, color = sex, stat="summary")) + geom_point() + geom_smooth(method="lm", se=F) +
+  labs(subtitle="Unisex Names vs Time", 
+       y="Total individuals", 
+       x="Time (Year)", 
+       title="Scatterplot with overlapping points") + scale_x_continuous(breaks= c(1880,1900, 1920, 1940 , 1960, 1980, 2000),labels = c("1880","1900", "1920", "1940" , "1960", "1980", "2000"))+theme_set(theme_dark())
+
+jplot
+```
+Based on this plot, it appears that the total number of individuals with unisex names is slightly negatively correlated with time. This may provide evidence in favor of a decline in popularity for unisex names. However, because the total number of individuals was already shown to be weakly correllated with time based on the previously created correlation matrix, This apparent result is not reliable. Additionally, this correlation is shown to be weak on this graph as well. Keeping both of these visualizations in mind, it is safe to assume that there is no significant association between time and the total number of individuals with unisex names. 
+
+Next, a time series chart was created to better visualize how the difference in unisex naming between males and females has progressed over time. 
+```{r}
+#Time Series Chart
+
+smalldata1 <- fullnames2[1:500,] 
+wplot <- ggplot(smalldata1, aes(x=year)) + 
+  geom_line(aes(y=fulltotal,color=sex)) + 
+  labs(title="Time Series Chart", 
+       subtitle="changes in unisex naming", 
+       y="Difference between males and females") + theme_set(theme_dark())
+
+wplot
+```
+
+This graph appears chaotic at first glance. Before describing the results, it is important to note that each point on this graph represents one individual, not one name. Despite this graph's apparent chaos, it does demonstrate one key finding; unisex naming between males and females was fairly consistent until around 1970. After this time, unisex naming began to vary significantly, producing the chaos observed here. Possible changes in social norms could be responsible for this change but more research is required to confirm this. 
+
+### Dimensionality Reduction
+
+Next, clustering using k-means was performed on the variables "male_share", "female_share", and "year" in relation to the total number of people with unisex names. 
+```{r}
+#kmeans calculation
+fullnamenumbers <- fullnamesnum %>% select(-name)
+kmeansn <- fullnamenumbers %>% kmeans(3)
+kmeansn$size
+```
+Based on this result, cluster two is far larger than the other clusters. Reasons for this discrepancy will be discussed further later. 
+
+```{r}
+#kmeans plot creation
+fullnamenums2 <- fullnamesnum %>% mutate(cluster=as.factor(kmeansn$cluster))
+
+fullnamenums2 %>% ggplot(aes(male_share,fulltotal, color=cluster)) + geom_point() + xlab("Proportion of Males") + ylab("Total Individuals")
+
+```
+
+```{r}
+
+fullnamenums2 %>% ggplot(aes(female_share,fulltotal, color=cluster)) + geom_point() + xlab("Proportion of Females") + ylab("Total Individuals")
+
+```
+
+```{r}
+
+fullnamenums2 %>% ggplot(aes(gap,fulltotal, color=cluster)) + geom_point() + xlab("Gap between Male and Female Proportions") + ylab("Total Individuals")
+
+```
+
+Through all three of these graphs and kmeans analyses, cluster 2 appears to be the largest. This cluster appears near the base of the graph. It is present here because most names are not heavily represented in the population. Therefore, the majority of the names will be represented in low quantities, which is what occurs here. Additionally, all of the clusters appear to be separated more so by their distance in "total individuals" rather than by their distance in male-to-female proportion gap, or the male and female proportions in general. This indicates that the proportions of males and females with unisex names is not relevant for clustering, implying an even distribution for these variables. Also, the sizes of clusters 1 and 3 pale in comparison to 2. Clusters 1 and 3 likely represent more popular unisex names than 2 due to their greater representation in the population.    

@@ -1,0 +1,104 @@
+---
+title: R and Python Can Work Together!
+author: Abraham Joshua Mathew
+date: '2020-05-15'
+slug: r-and-python-can-work-together
+categories: []
+tags: []
+description: 'R and Python can work together in some interesting ways'
+---
+
+R can work with python to achieve a variety of goals in convenient ways. For example, below is a short nucleotide sequence that we will define in R as "dnaseq".  
+
+```{R}
+#this is a R code chunk
+library(reticulate)
+
+dnaseq <- "ATGGCAATAACCCCCCGTTTCTACTTCTAGAGGAGAAAAGTATTGACATGAGCGCTCCCGGCACAAGGGCCAAAGAAGTCTCCAATTTCTTATTTCCGAATGACATGCGTCTCCTTGCGGGTAAATCACCGACCGCAATTCATAGAAGCCTGGGGGAACAGATAGGTCTAATTAGCTTAAGAGAGTAAATCCTGGGATCATTCAGTAGTAACCATAAACTTACGCTGGGCGCGCTTATAG"
+
+
+#your code here
+
+```
+
+Using Python, we are able to determine the length of the sequence and save it as the variable "lon". By dividing lon by three, we can determine that there are 80 codons contained within this sequence.  After doing so, we will divide the following sequence into codons. Then, we can set up a While loop to assign each codon its corressponding amino acid. 
+
+```{python}
+#this is an python code chunk 
+import re
+lon = len(r.dnaseq)
+
+codon = []
+a, b  = 0, 3
+while  a < lon:
+  codon.append(r.dnaseq[a:b])
+  a, b, = b, b+3
+
+codnames = []
+
+a = 0
+while a < 80:
+  if codon[a] == "TTC" or codon[a] == "TTT":
+    codnames.append("Phe")
+  elif codon[a] == "CTT" or codon[a] == "CTC" or codon[a] == "TTA" or codon[a] == "TTG" or codon[a] == "CTA" or codon[a] == "CTG":
+    codnames.append("Leu")
+  elif codon[a] == "ATT" or codon[a] == "ATC" or codon[a] == "ATA":
+    codnames.append("Ile")
+  elif codon[a] == "GTT" or codon[a] == "GTC" or codon[a] == "GTA"  or codon[a] == "GTG":
+    codnames.append("Val")
+  elif codon[a] == "ATG":
+    codnames.append("Met")
+  elif codon[a] == "TCT" or codon[a] == "TCC" or codon[a] == "TCG"  or codon[a] == "TCA"  or codon[a] == "AGC"  or codon[a] == "AGT":
+    codnames.append("Ser")
+  elif codon[a] == "CCT" or codon[a] == "CCC" or codon[a] == "CCA"  or codon[a] == "CCG":
+    codnames.append("Pro")
+  elif codon[a] == "ACA" or codon[a] == "ACT" or codon[a] == "ACG"  or codon[a] == "ACC":
+    codnames.append("Thr")
+  elif codon[a] == "GCA" or codon[a] == "GCT" or codon[a] == "GCC"  or codon[a] == "GCG":
+    codnames.append("Ala")
+  elif codon[a] == "TAC" or codon[a] == "TAT":
+    codnames.append("Tyr")
+  elif codon[a] == "CAC" or codon[a] == "CAT":
+    codnames.append("His")
+  elif codon[a] == "CAG"  or codon[a] == "CAA":
+    codnames.append("Gln")
+  elif codon[a] == "AAC" or codon[a] == "AAT":
+    codnames.append("Asn")
+  elif codon[a] == "AAA" or codon[a] == "AAG":
+    codnames.append("Lys")
+  elif codon[a] == "GAC" or codon[a] == "GAT":
+    codnames.append("Asp")
+  elif codon[a] == "GAG" or codon[a] == "GAA":
+    codnames.append("Glu")
+  elif codon[a] == "TGC" or codon[a] == "TGT":
+    codnames.append("Cys")
+  elif codon[a] == "TGG":
+    codnames.append("Trp")
+  elif codon[a] == "CGT" or codon[a] == "CGC" or codon[a] == "CGA"  or codon[a] == "CGG" or codon[a] == "AGA"  or codon[a] == "AGG":
+    codnames.append("Arg")
+  elif codon[a] == "GGG"  or codon[a] == "GGA"  or codon[a] == "GGC"  or codon[a] == "GGT":
+    codnames.append("Gly")
+  a = a + 1 
+
+codnames
+
+```
+
+Finally, we can use R to generate a bar graph demonstrating the frequency of each amino acid in the sequence using R. 
+```{r}
+#This is an R code chunk.
+
+library(dplyr)
+library(ggplot2)
+codondata <- py$codnames
+codondata <- data.frame(table(codondata))
+ggplot(data=codondata, aes(x=codondata, y=Freq)) +
+  geom_bar(stat="identity", fill="steelblue")+
+  geom_text(aes(label=codondata), vjust=1.6, color="white", size=3.5)+
+  theme_minimal()
+
+
+
+```
+As one can see, integrating R and Python together can allow for the solution of complex problems that neither can do alone. 
+

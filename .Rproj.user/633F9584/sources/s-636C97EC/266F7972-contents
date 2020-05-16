@@ -1,0 +1,324 @@
+---
+title: "Project 2: Statistical Analysis"
+output: html_notebook
+---
+### Abraham Joshua Mathew
+
+
+## Introduction
+
+For this project, I chose data focused on the perceived height and weight of individuals. It contains the biological sex, actual height (cm) and weight (kg), and reported height(cm) and weight(kg) of each individual enrolled in the study. Additionally, each participant was assigned an ID number. There are 200 observations total in this study.
+
+## Performing MANOVA 
+
+#### To determine the role of "Biological Sex" in determing "Reported Weight", "Actual Weight", "Reported Height", and "Actual Height" a MANOVA test was performed below. 
+```{r}
+#First, necessary packages for the entire project were loaded in
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lmtest)
+library(sandwich)
+library(plotROC)
+library(glmnet)
+
+#Then the dataset was read in
+
+Data_Set_For_Project_2 <- read.csv("project2data.csv")
+
+#Next the manova test was performed. 
+#prepping the data
+
+#conversion to numeric
+reported <- Data_Set_For_Project_2
+reported <- reported %>% transmute(ID = ID, sex = sex, weight = as.numeric(weight), height = as.numeric(height), repwt = as.numeric(repwt), repht = as.numeric(repht)) 
+
+#removal of NAs
+reported <- na.omit(reported)
+#186 observations remain
+
+#performing initial manova analysis
+wtmanova <- manova(cbind(weight,repwt,height,repht)~sex, data = reported)
+summary.aov(wtmanova)
+
+#performing follow up One-Way anovas
+wtanova <- aov(weight~sex, data = reported)
+summary(wtanova)
+repwtanova <- aov(repwt~sex, data = reported)
+summary(repwtanova)
+htanova <- aov(height~sex, data = reported)
+summary(htanova)
+rephtanova <- aov(repht~sex, data = reported)
+summary(rephtanova)
+
+#performing pairwise t-tests
+pairwise.t.test(reported$weight,reported$sex,p.adjust.method = "none")
+pairwise.t.test(reported$repwt,reported$sex,p.adjust.method = "none")
+pairwise.t.test(reported$height,reported$sex,p.adjust.method = "none")
+pairwise.t.test(reported$repht,reported$sex,p.adjust.method = "none")
+
+#calculating Probability of a type 1 error
+alpha <- 1 - (1-2e-16)^(9)
+alpha
+
+#Bonferroni Correction
+alphaovr <- 0.05/9
+alphaovr
+```
+
+
+According to these results, "Biological Sex" plays a statistically significant role in determining all of all of these factors (p<0.05). This result aligns with realistic expectations because Men, on average, tend to be taller and heavier than women. Therefore, being a man will give an individual a higher chance of being taller and heavier.  
+
+Upon conducting one-way anovas on each response variable, it was found that all effects  were still significant (p<0.05). This affirms the result from the previous test. 
+
+Finally, to further affirm these results, pair-wise t-tests were conducted to compare males and females across these response variables. All effects were found to be significant (p<0.05), affirming what was determined by the earlier tests. Based on all of the results, all of the groups significantly differ. This implies that men and women have different perceptions of their own weight. However, this likely stems from their difference in actual weight discussed above. 
+
+Overall, I have performed nine different tests to determine the relationship in question. Normally, this would produce a large type 1 error rate.However, this does not affect the significance of the results because the p-value obtained for them is extremely small (p=1.998e-15). Therefore, the type 1 error rate is negligible. However, to be thorough, the Bonferroni correction was performed. This returned a value of 0.00556. This level of significants was still met by all of the tests performed. Therefore, all of the results determined earlier still stand (p<0.00556).
+
+The assumptions have been met. The sample is random, containing independent observations. To elaborate, The groups do not influence each other. In other words, they are independent. Finally the sample size is large enough (n = 186).
+
+
+## Randomization Test
+
+#### To further validate the results observed above, a randomization test was performed on the data for the variables "reported weight" and "sex".
+```{r}
+#Calculating actual mean difference
+actualmeandiff <- mean(reported[reported$sex=="M",]$repwt)-mean(reported[reported$sex=="F",]$repwt)
+
+#performing randomization test
+rand<-vector()
+for(i in 1:5000){
+tmpsamp<-data.frame(repweight=sample(reported$repwt),sex = sample(reported$sex))
+rand[i]<-mean(tmpsamp[tmpsamp$sex=="M",]$repweight)-mean(tmpsamp[tmpsamp$sex=="F",]$repweight)}
+
+#two tailed p-value calculation
+mean(rand>actualmeandiff | rand< -actualmeandiff)
+
+#Generation and plotting of null distribution
+t=vector()
+for(i in 1:30000){
+samp<-rnorm(25,mean=actualmeandiff)
+t[i] <- (mean(samp)-actualmeandiff)/(sd(samp)/sqrt(25))
+}
+data.frame(t) %>%ggplot(aes(t)) + geom_histogram(aes(y=..density..))+stat_function(fun=dt,args=list(df=24),geom="line") 
+
+```
+
+The null hypothesis (Ho) for this test will be: "The mean reported weight is the same for Males as it is for Females"
+The alternative hypothesis (Ha) for this test will be: "The mean reported weight in Males is different from that of Females"
+
+With a p-value of 0, it is unlikely that these results occurred by chance. Therfore, we can reject the null hypothesis. Therefore, we can confirm that the mean reported weight in males is significantly different from that of females. The null distribution is also shown above. It appears to align well with the true distribution as well.
+
+
+## Linear Regression
+
+#### To determine how reported weight is affected by sex, actual weight, and actual height, a linear regression was performed. 
+```{r}
+#creation of model
+wtmodel <- lm(repwt~sex*weight*height, data = reported)
+summary(wtmodel)
+
+#visualization of the model
+ggplot(reported, aes(x=weight, y=repwt,group=sex))+geom_point(aes(color=sex))+
+geom_smooth(method="lm",formula=y~x,se=F,fullrange=T,aes(color=sex))+
+theme(legend.position=c(.9,.19))+xlab("weight")+ylab("reported weight")
+
+#checking for normality
+reported %>%ggplot(aes(reported$repwt)) + geom_histogram(aes(y=..density..))+stat_function(fun=dt,args=list(df=24),geom="line") 
+```
+
+According to the results above, weight, and height play a significant role in predicting how individuals predict their actual weight. More specifically, both of these explain some of the variation in predicted weight. Additionally, when controlling for height, for every 1 kg increase in weight, there is a -0.328 kg change in predicted weight. Also, when controlling for weight, each 1 cm increase in height results in a -0.325 change in weight. Finally, the interaction of weight and height is responsible for a  0.0074 kg increase in predicted weight. This effect, although statistically significant, is very small and it could be safe to ignore, unless one is working on a project where this level of detail can heavily influence results. Biological sex was found to have no statistically significant effect on predicted weight. However, if it did, if an individual was male, they would estimate their own weight to be 27.15 kg heavier. Its interactions with the other variables, height and weight, were also statistically insignificant (p>0.05). It is important to note that predicted height was excluded from the model because it is also a guess made by the individual. Therefore, it does not interact with actual height, actual weight, and biological sex reporting one's own weight. 
+
+Based on the graph above, it is clear that the assumptions of homoskedasticity and linearity have been met. A plot of the regression is shown above. 
+
+Based on the histogram above, the data appears right skewed, violating the assumption for normality. Due to this violation, bootstrap standard errors would be best to evaluate this data. However, we will first evaluate it using robust standard errors.
+
+#### Regression with robust standard errors.
+
+```{r}
+robustSE <- coeftest(wtmodel, vcov = vcovHC(wtmodel))
+robustSE
+```
+
+According to the results above, none of the results are significant (p>0.05). This is a change from the previous evaluation because height, weight, and their interaction were significant. Additionally, all of the coefficients have changed. Overall, based on these results, one can consider the effects of height, weight, and sex insignificant. However, because the assumption of normality was violated, this is not the correct test for analyzing this data. 
+
+Instead, Bootstrapped standard errors will yield a more accurate result. A regression based on Bootstrapped standard errors was conducted below. 
+
+#### Bootstrapped Standard Errors
+```{r}
+samp_distn<-replicate(5000, {
+boot_dat <- sample_frac(reported, replace=T) 
+fit <- lm(repwt~sex*weight*height, data = boot_dat)
+coef(fit) 
+})
+
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+
+```
+
+According to this data, the value for sex, which was insignificant in the previous tests, 
+
+## Logistic Regression
+
+Next, logistic regression was conducted to determine how well reported height and reported weight can predict biological sex. 
+
+```{r}
+
+#generation of the model
+reported <- reported %>% mutate(y = ifelse(sex=="M",1,0)) 
+logwtmodel <- glm(y~repwt+repht, reported, family = "binomial")
+exp(coef(logwtmodel))
+
+#predicting odds and sex from the model 
+predictodds <- predict(logwtmodel, type= "link")
+
+reported <- reported %>% mutate(predicted = predictodds, predsex = ifelse(predicted>1,"M","F"))
+
+#confusion matrix
+confmatrix <- table(truth=reported$sex,prediction=reported$predsex) %>% addmargins
+confmatrix
+
+Accuracy = (96+68)/181
+Accuracy
+Sensitivity = 68/82
+Sensitivity
+Specificity = 96/110
+Specificity
+Precision = 68/71
+Precision
+  
+
+#p = odds/1+odds
+
+#Plot of log odds density based on binary outcome variable
+reported %>% ggplot(aes(x=predicted,fill=sex)) + geom_density()+ xlab("Log odds") + ylab("Density")
+
+
+```
+According to these results, for every 1 kg increase in reported weight, there is a 1.245 increase in the odds of being male. Additionally, for every 1 cm increase in height, there is a 1.308 increase in the odds of being male. 
+
+The log odds plot is shown above. 
+
+On the metrics of accuracy, sensitivity, specificity, and recall, this model scored rather high. To elaborarte, in 90.61% of cases, it was able to accurately predict whether an individual was male or female based on reported height and weight. Additionally, the model was also sensitive enough to correctly predict whether an individual was male 82.93% of the time. Meanwhile, a similar proportion holds true for specifying females with a rate of 87.27%. Finally, the precision of the model was also high with probability of 0.9578. Overall, based on these metrics, the model performs rather well. 
+
+#### To further evaluate this data, an ROC curve was generated
+
+```{r}
+#generation of ROC curve
+reported <- reported %>% mutate(prob = predict(logwtmodel,type="response"))
+
+sensit<-function(p,data=data, y=y) mean(data[data$y==1,]$prob>p)
+specify<-function(p,data=data, y=y) mean(data[data$y==0,]$prob<p)
+sensitivity<-sapply(seq(0,1,.01),sensit,reported)
+specificity<-sapply(seq(0,1,.01),specify,reported)
+
+wtROC <- data.frame(sensitivity,specificity,cutoff=seq(0,1,.01))
+wtROC$TPR<-sensitivity
+wtROC$FPR<-1-specificity
+
+wtROC%>%ggplot(aes(FPR,TPR))+geom_path(size=1.5)+geom_segment(aes(x=0,y=0,xend=1,yend=1)) + scale_x_continuous(limits = c(0,1))
+
+ROCplottest <- ggplot(reported)+geom_roc(aes(d=y,m=prob), n.cuts=0)
+
+calc_auc(ROCplottest)
+                                                              
+```
+
+Based on this area under the curve, this model is a great fit. More specifically, there is a much higher proportion of true positives than false positives based on this result. The balance between specificity and sensitivity is great, according to these results.
+
+
+
+#### 10 fold Cross-validation
+
+To confirm the results above, a 10-fold cross validation was performed. 
+
+```{r}
+#Classification Diagnostic Function intoduced in class
+
+class_diag <- function(probs,truth){
+#CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+#CALCULATE EXACT AUC
+ord<-order(probs, decreasing=TRUE)
+probs <- probs[ord]; truth <- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+n <- length(TPR)
+auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+} 
+
+#performing the 10 fold crossvalidation
+k=10 
+data<-reported[sample(nrow(reported)),] 
+folds<-cut(seq(1:nrow(reported)),breaks=k,labels=F) 
+diags<-NULL
+for(i in 1:k){
+train<-data[folds!=i,]
+test<-data[folds==i,]
+truth<-test$y 
+fit<-glm(y~repwt+repht,data=train,family="binomial")
+probs<-predict(fit,newdata = test,type="response")
+diags<-rbind(diags,class_diag(probs,truth))
+}
+summarise_all(diags,mean)
+```
+
+In the table above, mean out of sample values for accuracy, sensitivity, sepecificity, ppv (recall), and auc are listed in that order. The auc still indicates that this model is a great fit. 
+
+## LASSO Regression
+
+Finally, a LASSO regression was performed on this data to predict an individual's predicted weight from their predicted height, actual height, actual weight, and sex. This will account for the chance that the model overfit in the previous test, delivering an accurate contribution to the results.
+
+```{r}
+y = as.matrix(reported$repwt)
+x = model.matrix(repwt~height+repht+weight+sex,data=reported)[,-1]
+
+cv <- cv.glmnet(x,y)
+{plot(cv$glmnet.fit, "lambda", label=TRUE); abline(v = log(cv$lambda.1se))}
+
+wtlasso<-glmnet(x,y,lambda=cv$lambda.1se)
+coef(wtlasso)
+
+```
+
+According to this model, actual weight, reported height, actual height are the best values to use to predict reported weight. These values have had low p-values in the previous tests so their inclusion here is not surprising. Sex is the only variable that was not useful as a predictor.
+
+#### Ten-fold Cross Validation
+
+```{r}
+#Generation of Model from variables above
+fit <- lm(repwt~height+repht+weight, data = reported)
+summary(fit)
+
+#Generation of Predicted Values
+yhat <- predict(fit)
+
+#Calculation of mean squared error (MSE)
+mean((reported$repwt-yhat)^2)
+
+k=10 
+data1<-reported[sample(nrow(reported)),] 
+folds<-cut(seq(1:nrow(reported)),breaks=k,labels=F) 
+diags<-NULL
+for(i in 1:k){
+train<-data1[folds!=i,]
+test<-data1[folds==i,]
+fit<-lm(repwt~height+repht+weight,data=train)
+yhat<-predict(fit,newdata=test)
+diags<-mean((test$repwt-yhat)^2)
+}
+mean(diags)
+
+```
+
+The model after going through 10 fold cross validation is a better fit than before. More specifically, the value after performing the cross validation is 6.898. This is lower than the original model's value of 7.117, indicating that it is a better fit. Additionally, because there is not a wide gap between the two variables, the model does not overfit. Finally, due to these results, the cross validated model will function better as a predictor than the original.   
+

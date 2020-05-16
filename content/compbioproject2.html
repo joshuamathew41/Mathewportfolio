@@ -1,0 +1,468 @@
+---
+title: "Project 2: Statistical Analysis"
+output: html_notebook
+---
+
+
+
+<div id="abraham-joshua-mathew" class="section level3">
+<h3>Abraham Joshua Mathew</h3>
+</div>
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>For this project, I chose data focused on the perceived height and weight of individuals. It contains the biological sex, actual height (cm) and weight (kg), and reported height(cm) and weight(kg) of each individual enrolled in the study. Additionally, each participant was assigned an ID number. There are 200 observations total in this study.</p>
+</div>
+<div id="performing-manova" class="section level2">
+<h2>Performing MANOVA</h2>
+<div id="to-determine-the-role-of-biological-sex-in-determing-reported-weight-actual-weight-reported-height-and-actual-height-a-manova-test-was-performed-below." class="section level4">
+<h4>To determine the role of “Biological Sex” in determing “Reported Weight”, “Actual Weight”, “Reported Height”, and “Actual Height” a MANOVA test was performed below.</h4>
+<pre class="r"><code>#First, necessary packages for the entire project were loaded in
+library(tidyverse)</code></pre>
+<pre><code>## -- Attaching packages --------------------- tidyverse 1.3.0 --</code></pre>
+<pre><code>## v ggplot2 3.2.1     v purrr   0.3.3
+## v tibble  2.1.3     v dplyr   0.8.4
+## v tidyr   1.0.2     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.4.0</code></pre>
+<pre><code>## Warning: package &#39;tidyr&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## -- Conflicts ------------------------ tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(lmtest)</code></pre>
+<pre><code>## Warning: package &#39;lmtest&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Loading required package: zoo</code></pre>
+<pre><code>## Warning: package &#39;zoo&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;zoo&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     as.Date, as.Date.numeric</code></pre>
+<pre class="r"><code>library(sandwich)</code></pre>
+<pre><code>## Warning: package &#39;sandwich&#39; was built under R version 3.6.3</code></pre>
+<pre class="r"><code>library(plotROC)</code></pre>
+<pre><code>## Warning: package &#39;plotROC&#39; was built under R version 3.6.3</code></pre>
+<pre class="r"><code>library(glmnet)</code></pre>
+<pre><code>## Warning: package &#39;glmnet&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## 
+## Attaching package: &#39;Matrix&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<pre><code>## Loaded glmnet 3.0-2</code></pre>
+<pre class="r"><code>#Then the dataset was read in
+
+Data_Set_For_Project_2 &lt;- read.csv(&quot;project2data.csv&quot;)
+
+#Next the manova test was performed. 
+#prepping the data
+
+#conversion to numeric
+reported &lt;- Data_Set_For_Project_2
+reported &lt;- reported %&gt;% transmute(ID = ID, sex = sex, weight = as.numeric(weight), height = as.numeric(height), repwt = as.numeric(repwt), repht = as.numeric(repht)) 
+
+#removal of NAs
+reported &lt;- na.omit(reported)
+#186 observations remain
+
+#performing initial manova analysis
+wtmanova &lt;- manova(cbind(weight,repwt,height,repht)~sex, data = reported)
+summary.aov(wtmanova)</code></pre>
+<pre><code>##  Response weight :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## sex           1  14024 14023.8  88.582 &lt; 2.2e-16 ***
+## Residuals   179  28339   158.3                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response repwt :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## sex           1  17751 17751.2  190.29 &lt; 2.2e-16 ***
+## Residuals   179  16698    93.3                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response height :
+##              Df  Sum Sq Mean Sq F value    Pr(&gt;F)    
+## sex           1  9256.1  9256.1  91.895 &lt; 2.2e-16 ***
+## Residuals   179 18029.6   100.7                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response repht :
+##              Df Sum Sq Mean Sq F value    Pr(&gt;F)    
+## sex           1 8656.2  8656.2  214.29 &lt; 2.2e-16 ***
+## Residuals   179 7230.5    40.4                      
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#performing follow up One-Way anovas
+wtanova &lt;- aov(weight~sex, data = reported)
+summary(wtanova)</code></pre>
+<pre><code>##              Df Sum Sq Mean Sq F value Pr(&gt;F)    
+## sex           1  14024   14024   88.58 &lt;2e-16 ***
+## Residuals   179  28338     158                   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>repwtanova &lt;- aov(repwt~sex, data = reported)
+summary(repwtanova)</code></pre>
+<pre><code>##              Df Sum Sq Mean Sq F value Pr(&gt;F)    
+## sex           1  17751   17751   190.3 &lt;2e-16 ***
+## Residuals   179  16698      93                   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>htanova &lt;- aov(height~sex, data = reported)
+summary(htanova)</code></pre>
+<pre><code>##              Df Sum Sq Mean Sq F value Pr(&gt;F)    
+## sex           1   9256    9256   91.89 &lt;2e-16 ***
+## Residuals   179  18030     101                   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>rephtanova &lt;- aov(repht~sex, data = reported)
+summary(rephtanova)</code></pre>
+<pre><code>##              Df Sum Sq Mean Sq F value Pr(&gt;F)    
+## sex           1   8656    8656   214.3 &lt;2e-16 ***
+## Residuals   179   7231      40                   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#performing pairwise t-tests
+pairwise.t.test(reported$weight,reported$sex,p.adjust.method = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  reported$weight and reported$sex 
+## 
+##   F     
+## M &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(reported$repwt,reported$sex,p.adjust.method = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  reported$repwt and reported$sex 
+## 
+##   F     
+## M &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(reported$height,reported$sex,p.adjust.method = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  reported$height and reported$sex 
+## 
+##   F     
+## M &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(reported$repht,reported$sex,p.adjust.method = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  reported$repht and reported$sex 
+## 
+##   F     
+## M &lt;2e-16
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>#calculating Probability of a type 1 error
+alpha &lt;- 1 - (1-2e-16)^(9)
+alpha</code></pre>
+<pre><code>## [1] 1.998401e-15</code></pre>
+<pre class="r"><code>#Bonferroni Correction
+alphaovr &lt;- 0.05/9
+alphaovr</code></pre>
+<pre><code>## [1] 0.005555556</code></pre>
+<p>According to these results, “Biological Sex” plays a statistically significant role in determining all of all of these factors (p&lt;0.05). This result aligns with realistic expectations because Men, on average, tend to be taller and heavier than women. Therefore, being a man will give an individual a higher chance of being taller and heavier.</p>
+<p>Upon conducting one-way anovas on each response variable, it was found that all effects were still significant (p&lt;0.05). This affirms the result from the previous test.</p>
+<p>Finally, to further affirm these results, pair-wise t-tests were conducted to compare males and females across these response variables. All effects were found to be significant (p&lt;0.05), affirming what was determined by the earlier tests. Based on all of the results, all of the groups significantly differ. This implies that men and women have different perceptions of their own weight. However, this likely stems from their difference in actual weight discussed above.</p>
+<p>Overall, I have performed nine different tests to determine the relationship in question. Normally, this would produce a large type 1 error rate.However, this does not affect the significance of the results because the p-value obtained for them is extremely small (p=1.998e-15). Therefore, the type 1 error rate is negligible. However, to be thorough, the Bonferroni correction was performed. This returned a value of 0.00556. This level of significants was still met by all of the tests performed. Therefore, all of the results determined earlier still stand (p&lt;0.00556).</p>
+<p>The assumptions have been met. The sample is random, containing independent observations. To elaborate, The groups do not influence each other. In other words, they are independent. Finally the sample size is large enough (n = 186).</p>
+</div>
+</div>
+<div id="randomization-test" class="section level2">
+<h2>Randomization Test</h2>
+<div id="to-further-validate-the-results-observed-above-a-randomization-test-was-performed-on-the-data-for-the-variables-reported-weight-and-sex." class="section level4">
+<h4>To further validate the results observed above, a randomization test was performed on the data for the variables “reported weight” and “sex”.</h4>
+<pre class="r"><code>#Calculating actual mean difference
+actualmeandiff &lt;- mean(reported[reported$sex==&quot;M&quot;,]$repwt)-mean(reported[reported$sex==&quot;F&quot;,]$repwt)
+
+#performing randomization test
+rand&lt;-vector()
+for(i in 1:5000){
+tmpsamp&lt;-data.frame(repweight=sample(reported$repwt),sex = sample(reported$sex))
+rand[i]&lt;-mean(tmpsamp[tmpsamp$sex==&quot;M&quot;,]$repweight)-mean(tmpsamp[tmpsamp$sex==&quot;F&quot;,]$repweight)}
+
+#two tailed p-value calculation
+mean(rand&gt;actualmeandiff | rand&lt; -actualmeandiff)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>#Generation and plotting of null distribution
+t=vector()
+for(i in 1:30000){
+samp&lt;-rnorm(25,mean=actualmeandiff)
+t[i] &lt;- (mean(samp)-actualmeandiff)/(sd(samp)/sqrt(25))
+}
+data.frame(t) %&gt;%ggplot(aes(t)) + geom_histogram(aes(y=..density..))+stat_function(fun=dt,args=list(df=24),geom=&quot;line&quot;) </code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/compbioproject2_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>The null hypothesis (Ho) for this test will be: “The mean reported weight is the same for Males as it is for Females”
+The alternative hypothesis (Ha) for this test will be: “The mean reported weight in Males is different from that of Females”</p>
+<p>With a p-value of 0, it is unlikely that these results occurred by chance. Therfore, we can reject the null hypothesis. Therefore, we can confirm that the mean reported weight in males is significantly different from that of females. The null distribution is also shown above. It appears to align well with the true distribution as well.</p>
+</div>
+</div>
+<div id="linear-regression" class="section level2">
+<h2>Linear Regression</h2>
+<div id="to-determine-how-reported-weight-is-affected-by-sex-actual-weight-and-actual-height-a-linear-regression-was-performed." class="section level4">
+<h4>To determine how reported weight is affected by sex, actual weight, and actual height, a linear regression was performed.</h4>
+<pre class="r"><code>#creation of model
+wtmodel &lt;- lm(repwt~sex*weight*height, data = reported)
+summary(wtmodel)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = repwt ~ sex * weight * height, data = reported)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -5.8590 -1.2194 -0.0902  1.2394  7.7424 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        58.8970118 12.3173301   4.782  3.7e-06 ***
+## sexM               27.1505646 47.8404237   0.568 0.571094    
+## weight             -0.3280269  0.0868843  -3.775 0.000219 ***
+## height             -0.3249575  0.0825886  -3.935 0.000120 ***
+## sexM:weight         0.0386255  0.6248684   0.062 0.950783    
+## sexM:height        -0.1396750  0.2713998  -0.515 0.607457    
+## weight:height       0.0074219  0.0006896  10.763  &lt; 2e-16 ***
+## sexM:weight:height -0.0004049  0.0035050  -0.116 0.908177    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.228 on 173 degrees of freedom
+## Multiple R-squared:  0.9751, Adjusted R-squared:  0.9741 
+## F-statistic: 966.9 on 7 and 173 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>#visualization of the model
+ggplot(reported, aes(x=weight, y=repwt,group=sex))+geom_point(aes(color=sex))+
+geom_smooth(method=&quot;lm&quot;,formula=y~x,se=F,fullrange=T,aes(color=sex))+
+theme(legend.position=c(.9,.19))+xlab(&quot;weight&quot;)+ylab(&quot;reported weight&quot;)</code></pre>
+<p><img src="/compbioproject2_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>#checking for normality
+reported %&gt;%ggplot(aes(reported$repwt)) + geom_histogram(aes(y=..density..))+stat_function(fun=dt,args=list(df=24),geom=&quot;line&quot;) </code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="/compbioproject2_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<p>According to the results above, weight, and height play a significant role in predicting how individuals predict their actual weight. More specifically, both of these explain some of the variation in predicted weight. Additionally, when controlling for height, for every 1 kg increase in weight, there is a -0.328 kg change in predicted weight. Also, when controlling for weight, each 1 cm increase in height results in a -0.325 change in weight. Finally, the interaction of weight and height is responsible for a 0.0074 kg increase in predicted weight. This effect, although statistically significant, is very small and it could be safe to ignore, unless one is working on a project where this level of detail can heavily influence results. Biological sex was found to have no statistically significant effect on predicted weight. However, if it did, if an individual was male, they would estimate their own weight to be 27.15 kg heavier. Its interactions with the other variables, height and weight, were also statistically insignificant (p&gt;0.05). It is important to note that predicted height was excluded from the model because it is also a guess made by the individual. Therefore, it does not interact with actual height, actual weight, and biological sex reporting one’s own weight.</p>
+<p>Based on the graph above, it is clear that the assumptions of homoskedasticity and linearity have been met. A plot of the regression is shown above.</p>
+<p>Based on the histogram above, the data appears right skewed, violating the assumption for normality. Due to this violation, bootstrap standard errors would be best to evaluate this data. However, we will first evaluate it using robust standard errors.</p>
+</div>
+<div id="regression-with-robust-standard-errors." class="section level4">
+<h4>Regression with robust standard errors.</h4>
+<pre class="r"><code>robustSE &lt;- coeftest(wtmodel, vcov = vcovHC(wtmodel))
+robustSE</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                       Estimate  Std. Error t value Pr(&gt;|t|)
+## (Intercept)         5.8897e+01  1.0912e+02  0.5398   0.5901
+## sexM                2.7151e+01  1.1900e+02  0.2282   0.8198
+## weight             -3.2803e-01  1.9728e+00 -0.1663   0.8681
+## height             -3.2496e-01  6.6033e-01 -0.4921   0.6233
+## sexM:weight         3.8625e-02  2.0876e+00  0.0185   0.9853
+## sexM:height        -1.3968e-01  7.1232e-01 -0.1961   0.8448
+## weight:height       7.4219e-03  1.1906e-02  0.6234   0.5339
+## sexM:weight:height -4.0485e-04  1.2497e-02 -0.0324   0.9742</code></pre>
+<p>According to the results above, none of the results are significant (p&gt;0.05). This is a change from the previous evaluation because height, weight, and their interaction were significant. Additionally, all of the coefficients have changed. Overall, based on these results, one can consider the effects of height, weight, and sex insignificant. However, because the assumption of normality was violated, this is not the correct test for analyzing this data.</p>
+<p>Instead, Bootstrapped standard errors will yield a more accurate result. A regression based on Bootstrapped standard errors was conducted below.</p>
+</div>
+<div id="bootstrapped-standard-errors" class="section level4">
+<h4>Bootstrapped Standard Errors</h4>
+<pre class="r"><code>samp_distn&lt;-replicate(5000, {
+boot_dat &lt;- sample_frac(reported, replace=T) 
+fit &lt;- lm(repwt~sex*weight*height, data = boot_dat)
+coef(fit) 
+})
+
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)    sexM   weight    height sexM:weight sexM:height weight:height
+## 1    57.69439 75.3245 1.037455 0.3497601    1.245675   0.4430765    0.00626047
+##   sexM:weight:height
+## 1        0.007344287</code></pre>
+<p>According to this data, the value for sex, which was insignificant in the previous tests,</p>
+</div>
+</div>
+<div id="logistic-regression" class="section level2">
+<h2>Logistic Regression</h2>
+<p>Next, logistic regression was conducted to determine how well reported height and reported weight can predict biological sex.</p>
+<pre class="r"><code>#generation of the model
+reported &lt;- reported %&gt;% mutate(y = ifelse(sex==&quot;M&quot;,1,0)) 
+logwtmodel &lt;- glm(y~repwt+repht, reported, family = &quot;binomial&quot;)
+exp(coef(logwtmodel))</code></pre>
+<pre><code>##  (Intercept)        repwt        repht 
+## 1.149501e-26 1.244742e+00 1.307822e+00</code></pre>
+<pre class="r"><code>#predicting odds and sex from the model 
+predictodds &lt;- predict(logwtmodel, type= &quot;link&quot;)
+
+reported &lt;- reported %&gt;% mutate(predicted = predictodds, predsex = ifelse(predicted&gt;1,&quot;M&quot;,&quot;F&quot;))
+
+#confusion matrix
+confmatrix &lt;- table(truth=reported$sex,prediction=reported$predsex) %&gt;% addmargins
+confmatrix</code></pre>
+<pre><code>##      prediction
+## truth   F   M Sum
+##   F    96   3  99
+##   M    14  68  82
+##   Sum 110  71 181</code></pre>
+<pre class="r"><code>Accuracy = (96+68)/181
+Accuracy</code></pre>
+<pre><code>## [1] 0.9060773</code></pre>
+<pre class="r"><code>Sensitivity = 68/82
+Sensitivity</code></pre>
+<pre><code>## [1] 0.8292683</code></pre>
+<pre class="r"><code>Specificity = 96/110
+Specificity</code></pre>
+<pre><code>## [1] 0.8727273</code></pre>
+<pre class="r"><code>Precision = 68/71
+Precision</code></pre>
+<pre><code>## [1] 0.9577465</code></pre>
+<pre class="r"><code>#p = odds/1+odds
+
+#Plot of log odds density based on binary outcome variable
+reported %&gt;% ggplot(aes(x=predicted,fill=sex)) + geom_density()+ xlab(&quot;Log odds&quot;) + ylab(&quot;Density&quot;)</code></pre>
+<p><img src="/compbioproject2_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+According to these results, for every 1 kg increase in reported weight, there is a 1.245 increase in the odds of being male. Additionally, for every 1 cm increase in height, there is a 1.308 increase in the odds of being male.</p>
+<p>The log odds plot is shown above.</p>
+<p>On the metrics of accuracy, sensitivity, specificity, and recall, this model scored rather high. To elaborarte, in 90.61% of cases, it was able to accurately predict whether an individual was male or female based on reported height and weight. Additionally, the model was also sensitive enough to correctly predict whether an individual was male 82.93% of the time. Meanwhile, a similar proportion holds true for specifying females with a rate of 87.27%. Finally, the precision of the model was also high with probability of 0.9578. Overall, based on these metrics, the model performs rather well.</p>
+<div id="to-further-evaluate-this-data-an-roc-curve-was-generated" class="section level4">
+<h4>To further evaluate this data, an ROC curve was generated</h4>
+<pre class="r"><code>#generation of ROC curve
+reported &lt;- reported %&gt;% mutate(prob = predict(logwtmodel,type=&quot;response&quot;))
+
+sensit&lt;-function(p,data=data, y=y) mean(data[data$y==1,]$prob&gt;p)
+specify&lt;-function(p,data=data, y=y) mean(data[data$y==0,]$prob&lt;p)
+sensitivity&lt;-sapply(seq(0,1,.01),sensit,reported)
+specificity&lt;-sapply(seq(0,1,.01),specify,reported)
+
+wtROC &lt;- data.frame(sensitivity,specificity,cutoff=seq(0,1,.01))
+wtROC$TPR&lt;-sensitivity
+wtROC$FPR&lt;-1-specificity
+
+wtROC%&gt;%ggplot(aes(FPR,TPR))+geom_path(size=1.5)+geom_segment(aes(x=0,y=0,xend=1,yend=1)) + scale_x_continuous(limits = c(0,1))</code></pre>
+<p><img src="/compbioproject2_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code>ROCplottest &lt;- ggplot(reported)+geom_roc(aes(d=y,m=prob), n.cuts=0)
+
+calc_auc(ROCplottest)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.9702513</code></pre>
+<p>Based on this area under the curve, this model is a great fit. More specifically, there is a much higher proportion of true positives than false positives based on this result. The balance between specificity and sensitivity is great, according to these results.</p>
+</div>
+<div id="fold-cross-validation" class="section level4">
+<h4>10 fold Cross-validation</h4>
+<p>To confirm the results above, a 10-fold cross validation was performed.</p>
+<pre class="r"><code>#Classification Diagnostic Function intoduced in class
+
+class_diag &lt;- function(probs,truth){
+#CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV
+tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+#CALCULATE EXACT AUC
+ord&lt;-order(probs, decreasing=TRUE)
+probs &lt;- probs[ord]; truth &lt;- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+n &lt;- length(TPR)
+auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+} 
+
+#performing the 10 fold crossvalidation
+k=10 
+data&lt;-reported[sample(nrow(reported)),] 
+folds&lt;-cut(seq(1:nrow(reported)),breaks=k,labels=F) 
+diags&lt;-NULL
+for(i in 1:k){
+train&lt;-data[folds!=i,]
+test&lt;-data[folds==i,]
+truth&lt;-test$y 
+fit&lt;-glm(y~repwt+repht,data=train,family=&quot;binomial&quot;)
+probs&lt;-predict(fit,newdata = test,type=&quot;response&quot;)
+diags&lt;-rbind(diags,class_diag(probs,truth))
+}
+summarise_all(diags,mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.9055556 0.9003535 0.9203571 0.8959921 0.9706964</code></pre>
+<p>In the table above, mean out of sample values for accuracy, sensitivity, sepecificity, ppv (recall), and auc are listed in that order. The auc still indicates that this model is a great fit.</p>
+</div>
+</div>
+<div id="lasso-regression" class="section level2">
+<h2>LASSO Regression</h2>
+<p>Finally, a LASSO regression was performed on this data to predict an individual’s predicted weight from their predicted height, actual height, actual weight, and sex. This will account for the chance that the model overfit in the previous test, delivering an accurate contribution to the results.</p>
+<pre class="r"><code>y = as.matrix(reported$repwt)
+x = model.matrix(repwt~height+repht+weight+sex,data=reported)[,-1]
+
+cv &lt;- cv.glmnet(x,y)
+{plot(cv$glmnet.fit, &quot;lambda&quot;, label=TRUE); abline(v = log(cv$lambda.1se))}</code></pre>
+<p><img src="/compbioproject2_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<pre class="r"><code>wtlasso&lt;-glmnet(x,y,lambda=cv$lambda.1se)
+coef(wtlasso)</code></pre>
+<pre><code>## 5 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                      s0
+## (Intercept) 25.11431248
+## height       0.03174088
+## repht        0.09830053
+## weight       0.28030444
+## sexM         .</code></pre>
+<p>According to this model, actual weight, reported height, actual height are the best values to use to predict reported weight. These values have had low p-values in the previous tests so their inclusion here is not surprising. Sex is the only variable that was not useful as a predictor.</p>
+<div id="ten-fold-cross-validation" class="section level4">
+<h4>Ten-fold Cross Validation</h4>
+<pre class="r"><code>#Generation of Model from variables above
+fit &lt;- lm(repwt~height+repht+weight, data = reported)
+summary(fit)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = repwt ~ height + repht + weight, data = reported)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.0702 -1.5817 -0.0705  1.6218  8.6957 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -33.32607    4.20831  -7.919 2.54e-13 ***
+## height        0.86699    0.03026  28.648  &lt; 2e-16 ***
+## repht        -0.63871    0.05054 -12.639  &lt; 2e-16 ***
+## weight        0.89297    0.02110  42.328  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.698 on 177 degrees of freedom
+## Multiple R-squared:  0.9626, Adjusted R-squared:  0.962 
+## F-statistic:  1519 on 3 and 177 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>#Generation of Predicted Values
+yhat &lt;- predict(fit)
+
+#Calculation of mean squared error (MSE)
+mean((reported$repwt-yhat)^2)</code></pre>
+<pre><code>## [1] 7.117497</code></pre>
+<pre class="r"><code>k=10 
+data1&lt;-reported[sample(nrow(reported)),] 
+folds&lt;-cut(seq(1:nrow(reported)),breaks=k,labels=F) 
+diags&lt;-NULL
+for(i in 1:k){
+train&lt;-data1[folds!=i,]
+test&lt;-data1[folds==i,]
+fit&lt;-lm(repwt~height+repht+weight,data=train)
+yhat&lt;-predict(fit,newdata=test)
+diags&lt;-mean((test$repwt-yhat)^2)
+}
+mean(diags)</code></pre>
+<pre><code>## [1] 7.713482</code></pre>
+<p>The model after going through 10 fold cross validation is a better fit than before. More specifically, the value after performing the cross validation is 6.898. This is lower than the original model’s value of 7.117, indicating that it is a better fit. Additionally, because there is not a wide gap between the two variables, the model does not overfit. Finally, due to these results, the cross validated model will function better as a predictor than the original.</p>
+</div>
+</div>

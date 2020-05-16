@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Abraham Joshua Mathew" />
+    <meta name="description" content="Describe your website">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title></title>
+    <meta name="generator" content="Hugo 0.70.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/blog/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume.pdf">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/compbioprojectone/"></a></strong>
+          </h3>
+        </div>
+        <div class="blog-title">
+          <h4>
+          January 1, 0001
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="project-1-exploratory-data-analysis" class="section level1">
+<h1>Project 1: Exploratory Data Analysis</h1>
+<div id="author-abraham-joshua-mathew" class="section level4">
+<h4>author: Abraham Joshua Mathew</h4>
+</div>
+<div id="uteid-ajm5874" class="section level4">
+<h4>uteid: ajm5874</h4>
+</div>
+<div id="date-31620" class="section level4">
+<h4>date: ’3/16/20</h4>
+</div>
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>In this project, the dataset “babynames” was imported and combined with the dataset “unisex_names”. By comparing these two datasets, it is possible to analyze the history of unisex names in america, including how common they are, the distribution of the names across sex, and their changes in popularity over the years.</p>
+<p>For some background the dataset “babynames”, it was provided by the social security administration and it contains all names with at least 5 uses from as early as 1880. The variables in this dataset include the individual’s year of birth, the individual’s name, their sex, the total number of individuals born in that year with the same name, and the proportion of individuals born with that name during the specific year when compared to the general population.</p>
+<p>As for the dataset “unisex_names”, it contains some of the most common unisex names in America.The variables it contains include information about the total number of living Americans with the name, the proportion of males who bear the name, the proportion of females who bear the name, and the gap between these proportions.</p>
+<p>Before analyzing this dataset, it is unclear which associations will arise. There will be an an inverse correlation between male and female proportion because they are already known to be inversely related. However, beyond this, it is difficult to predict how these variables will interact.</p>
+<p>To begin the analysis, the necessary packages were imported. Additionally, the two aforementioned datasets were assigned names within the local environment</p>
+<pre class="r"><code>library(babynames)
+library(dplyr)
+library(tidyr)
+library(corrplot)
+library(reshape)
+library(reshape2)
+library(ggplot2)
+library(fivethirtyeight)
+library(formatR)
+
+namesbaby &lt;- babynames
+uninames &lt;- unisex_names</code></pre>
+</div>
+<div id="tidying-and-merging-the-datasets" class="section level3">
+<h3>Tidying and Merging the Datasets</h3>
+<p>To begin the analysis, the datasets first need to be merged and tidied. After some deliberation, the two data sets were merged first, using an inner join by the variable “name” via the merge function. This join was perfect for the analysis at hand because it would allow for the preservation of all names common to both datasets. At the same time, it would also allow for the preservation of the variables necessary for later analysis. During this join, all observations that were not in the unisex dataset were dropped. This means that only unisex names remain. There should not be any significant problems with this.</p>
+<p>Because the dataset was already tidy, no further tidying was required. However, combining the variables “name” and “sex” was attempted to provide an easier format for analysis. However, as the project continued, it was far more effective to leave these variables separated in order to identify each unique individual more easily.</p>
+<pre class="r"><code>fullnames &lt;- merge(namesbaby, uninames)
+fullnamest &lt;- fullnames %&gt;% pivot_longer(c(name, sex), names_to = &quot;name,sex&quot;, 
+    values_to = &quot;sex&quot;)
+fullnamesu &lt;- fullnamest %&gt;% pivot_wider(names_from = `name,sex`, 
+    values_from = sex)
+head(fullnamest)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+##    year     n       prop total male_share female_share   gap `name,sex` sex    
+##   &lt;dbl&gt; &lt;int&gt;      &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;  
+## 1  2007     8 0.00000378  227.      0.585        0.415 0.170 name       Aalijah
+## 2  2007     8 0.00000378  227.      0.585        0.415 0.170 sex        F      
+## 3  2002     9 0.00000456  227.      0.585        0.415 0.170 name       Aalijah
+## 4  2002     9 0.00000456  227.      0.585        0.415 0.170 sex        F      
+## 5  2007    10 0.00000452  227.      0.585        0.415 0.170 name       Aalijah
+## 6  2007    10 0.00000452  227.      0.585        0.415 0.170 sex        M</code></pre>
+<pre class="r"><code>head(fullnamesu)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+##    year     n       prop total male_share female_share   gap name      sex      
+##   &lt;dbl&gt; &lt;int&gt;      &lt;dbl&gt; &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt; &lt;list&gt;    &lt;list&gt;   
+## 1  2007     8 0.00000378  227.      0.585        0.415 0.170 &lt;chr [1]&gt; &lt;chr [1]&gt;
+## 2  2002     9 0.00000456  227.      0.585        0.415 0.170 &lt;chr [1]&gt; &lt;chr [1]&gt;
+## 3  2007    10 0.00000452  227.      0.585        0.415 0.170 &lt;chr [1]&gt; &lt;chr [1]&gt;
+## 4  2016    11 0.00000545  227.      0.585        0.415 0.170 &lt;chr [1]&gt; &lt;chr [1]&gt;
+## 5  2014    21 0.0000103   227.      0.585        0.415 0.170 &lt;chr [1]&gt; &lt;chr [1]&gt;
+## 6  2009    12 0.00000566  227.      0.585        0.415 0.170 &lt;chr [1]&gt; &lt;chr [1]&gt;</code></pre>
+</div>
+<div id="wrangling" class="section level3">
+<h3>Wrangling</h3>
+<p>In order to determine the true total number of male and female individuals bearing each name during each year, the total and n columns were combined into one using the mutate function. This will provide a combined total of individuals based off of both datasets. The total and n columns were then removed using the select function.</p>
+<pre class="r"><code>fullnames2 &lt;- fullnames %&gt;% mutate(fulltotal = total + n)
+fullnames2 &lt;- fullnames2 %&gt;% select(-total, -n)
+glimpse(fullnames2)</code></pre>
+<pre><code>## Observations: 65,889
+## Variables: 8
+## $ name         &lt;chr&gt; &quot;Aalijah&quot;, &quot;Aalijah&quot;, &quot;Aalijah&quot;, &quot;Aalijah&quot;, &quot;Aalijah&quot;,...
+## $ year         &lt;dbl&gt; 2007, 2002, 2007, 2016, 2014, 2009, 2015, 2009, 2004, ...
+## $ sex          &lt;chr&gt; &quot;F&quot;, &quot;F&quot;, &quot;M&quot;, &quot;M&quot;, &quot;M&quot;, &quot;M&quot;, &quot;M&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;, &quot;F&quot;,...
+## $ prop         &lt;dbl&gt; 3.780e-06, 4.560e-06, 4.520e-06, 5.450e-06, 1.027e-05,...
+## $ male_share   &lt;dbl&gt; 0.5851041, 0.5851041, 0.5851041, 0.5851041, 0.5851041,...
+## $ female_share &lt;dbl&gt; 0.4148959, 0.4148959, 0.4148959, 0.4148959, 0.4148959,...
+## $ gap          &lt;dbl&gt; 0.1702082, 0.1702082, 0.1702082, 0.1702082, 0.1702082,...
+## $ fulltotal    &lt;dbl&gt; 235.3348, 236.3348, 237.3348, 238.3348, 248.3348, 239....</code></pre>
+<p>Next, summary statistics were calculated for each variable grouped by each name. Additionally, the total number of unique names and observations were determined and placed in the table below. The processes used in R were performed using the code below:</p>
+<pre class="r"><code>cormat1 &lt;- fullnames2 %&gt;% select_if(is.numeric)
+
+fullnamesnum &lt;- fullnames2 %&gt;% select(name, year, prop, male_share, 
+    female_share, gap, fulltotal)
+
+fullnamesmean &lt;- fullnamesnum %&gt;% group_by(name) %&gt;% summarize_all(mean)
+
+fullnamesmax &lt;- fullnames2 %&gt;% group_by(name) %&gt;% summarize_all(max)
+
+
+# minimum was grouped by name and year
+fullnamesmin &lt;- fullnames2 %&gt;% group_by(name, year) %&gt;% summarize_all(min)
+
+fullnamessd &lt;- fullnamesnum %&gt;% group_by(name) %&gt;% summarize_all(sd)
+
+fullnamesvar &lt;- fullnamesnum %&gt;% group_by(name) %&gt;% summarize_all(var)
+
+fullnamesmedian &lt;- cormat1 %&gt;% summarize_all(median)
+
+fullnamescount &lt;- fullnames2 %&gt;% group_by(name) %&gt;% summarise(n())
+
+fullnamesdistinct &lt;- fullnames2 %&gt;% summarise_all(n_distinct)
+fullnamesdistinct</code></pre>
+<pre><code>##   name year sex  prop male_share female_share gap fulltotal
+## 1  919  138   2 10353        919          919 919     25442</code></pre>
+<pre class="r"><code># quantile table creation
+
+quantprp &lt;- quantile(fullnames2$prop)
+quantmale &lt;- quantile(fullnames2$male_share)
+quantfemale &lt;- quantile(fullnames2$female_share)
+quanttotal &lt;- quantile(fullnames2$fulltotal)
+quantgap &lt;- quantile(fullnames2$gap)
+quantyear &lt;- quantile(fullnames2$year)
+quanttable &lt;- data.frame(quantprp)
+quanttable &lt;- quanttable %&gt;% mutate(prop = quantprp, male = quantmale, 
+    female = quantfemale, fulltotal = quanttotal, gap = quantgap, 
+    year = quantyear) %&gt;% select(-quantprp)
+
+# correllation matrix creation
+cormat1 &lt;- fullnames2 %&gt;% select_if(is.numeric)
+
+cormat &lt;- cor(cormat1)
+cormat2 &lt;- data.frame(cormat)
+cormat2 &lt;- round(cor(cormat), 2)
+melted_cormat &lt;- melt(cormat2)
+
+
+# Determine which names are majority men and which are
+# majority women.
+
+Mennames &lt;- fullnames2 %&gt;% filter(male_share &gt; 0.5)
+Womennames &lt;- fullnames2 %&gt;% filter(female_share &gt; 0.5)
+mostmalename &lt;- Mennames %&gt;% arrange(!desc(male_share))
+
+mostfemalename &lt;- Womennames %&gt;% arrange(!desc(female_share))</code></pre>
+<p>Correlation Matrix:</p>
+<pre class="r"><code>cormat2</code></pre>
+<pre><code>##               year  prop male_share female_share   gap fulltotal
+## year          1.00 -0.51       0.08        -0.08 -0.06     -0.50
+## prop         -0.51  1.00      -0.09         0.09 -0.33      0.74
+## male_share    0.08 -0.09       1.00        -1.00  0.06     -0.16
+## female_share -0.08  0.09      -1.00         1.00 -0.06      0.16
+## gap          -0.06 -0.33       0.06        -0.06  1.00     -0.32
+## fulltotal    -0.50  0.74      -0.16         0.16 -0.32      1.00</code></pre>
+<p>Quantile table for each numeric variable (in order of 0%, 25%, 50%, 75%, 100%:</p>
+<pre class="r"><code>quanttable</code></pre>
+<pre><code>##         prop      male    female   fulltotal          gap year
+## 1 0.00000226 0.3335607 0.3337223    105.2110 7.172815e-05 1880
+## 2 0.00000418 0.4191630 0.4096346    478.4376 8.542131e-02 1952
+## 3 0.00000768 0.5077381 0.4922619   1210.9546 1.721365e-01 1986
+## 4 0.00002043 0.5903654 0.5808370   3541.6767 2.590705e-01 2004
+## 5 0.00696659 0.6662777 0.6664393 180675.3281 3.328785e-01 2017</code></pre>
+<p>Maximum Values for each variable in each year gruped by name</p>
+<pre class="r"><code>fullnamesmax</code></pre>
+<pre><code>## # A tibble: 919 x 8
+##    name     year sex         prop male_share female_share    gap fulltotal
+##    &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Aalijah  2017 M     0.0000103       0.585        0.415 0.170       248.
+##  2 Aamari   2017 M     0.0000074       0.564        0.436 0.128       154.
+##  3 Aarin    2017 M     0.0000199       0.588        0.412 0.176       732.
+##  4 Aaryn    2017 M     0.0000359       0.392        0.608 0.215      1462.
+##  5 Abrar    2017 M     0.0000165       0.482        0.518 0.0353      608.
+##  6 Adair    2017 M     0.0000452       0.548        0.452 0.0951     2255.
+##  7 Adama    2017 M     0.0000132       0.398        0.602 0.203       701.
+##  8 Adel     2017 M     0.0000445       0.577        0.423 0.153      1829.
+##  9 Adi      2017 M     0.0000197       0.407        0.593 0.185      1137.
+## 10 Adisa    2017 M     0.00000526      0.413        0.587 0.174       161.
+## # ... with 909 more rows</code></pre>
+<p>Means for each numeric variable grouped by name:</p>
+<pre class="r"><code>fullnamesmean &lt;- fullnamesmean %&gt;% select(name, year, prop, male_share, 
+    female_share, gap, fulltotal)
+fullnamesmean</code></pre>
+<pre><code>## # A tibble: 919 x 7
+##    name     year       prop male_share female_share    gap fulltotal
+##    &lt;chr&gt;   &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Aalijah 2008. 0.00000488      0.585        0.415 0.170       237.
+##  2 Aamari  2010  0.00000370      0.564        0.436 0.128       147.
+##  3 Aarin   1996. 0.00000599      0.588        0.412 0.176       705.
+##  4 Aaryn   1997. 0.0000108       0.392        0.608 0.215      1413.
+##  5 Abrar   2004. 0.00000704      0.482        0.518 0.0353      591.
+##  6 Adair   1970. 0.00000943      0.548        0.452 0.0951     2172.
+##  7 Adama   1999. 0.00000623      0.398        0.602 0.203       685.
+##  8 Adel    1966. 0.0000109       0.577        0.423 0.153      1792.
+##  9 Adi     1998. 0.00000881      0.407        0.593 0.185      1116.
+## 10 Adisa   1999. 0.00000330      0.413        0.587 0.174       157.
+## # ... with 909 more rows</code></pre>
+<p>Total number of occurrances for each name and names with maximum occurances</p>
+<pre class="r"><code>fullnamescount</code></pre>
+<pre><code>## # A tibble: 919 x 2
+##    name    `n()`
+##    &lt;chr&gt;   &lt;int&gt;
+##  1 Aalijah    34
+##  2 Aamari     27
+##  3 Aarin      71
+##  4 Aaryn      82
+##  5 Abrar      53
+##  6 Adair     157
+##  7 Adama      67
+##  8 Adel      165
+##  9 Adi        76
+## 10 Adisa      26
+## # ... with 909 more rows</code></pre>
+<pre class="r"><code>fullnamescount[fullnamescount$`n()` == max(fullnamescount$`n()`), 
+    ]</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   name   `n()`
+##   &lt;chr&gt;  &lt;int&gt;
+## 1 Jessie   276
+## 2 Ollie    276
+## 3 Tommie   276</code></pre>
+<p>Total distinct values for each variable:</p>
+<pre class="r"><code>fullnamesdistinct</code></pre>
+<pre><code>##   name year sex  prop male_share female_share gap fulltotal
+## 1  919  138   2 10353        919          919 919     25442</code></pre>
+<p>Least number of occurrances for each name in each year and the least common names overall:</p>
+<pre class="r"><code>fullnamesmin</code></pre>
+<pre><code>## # A tibble: 42,044 x 8
+## # Groups:   name [919]
+##    name     year sex         prop male_share female_share   gap fulltotal
+##    &lt;chr&gt;   &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Aalijah  1994 F     0.00000257      0.585        0.415 0.170      232.
+##  2 Aalijah  1995 F     0.0000026       0.585        0.415 0.170      232.
+##  3 Aalijah  1999 F     0.00000257      0.585        0.415 0.170      232.
+##  4 Aalijah  2001 F     0.00000455      0.585        0.415 0.170      236.
+##  5 Aalijah  2002 F     0.0000029       0.585        0.415 0.170      233.
+##  6 Aalijah  2003 F     0.00000299      0.585        0.415 0.170      233.
+##  7 Aalijah  2004 F     0.00000298      0.585        0.415 0.170      233.
+##  8 Aalijah  2005 M     0.00000564      0.585        0.415 0.170      239.
+##  9 Aalijah  2006 F     0.00000228      0.585        0.415 0.170      232.
+## 10 Aalijah  2007 F     0.00000378      0.585        0.415 0.170      235.
+## # ... with 42,034 more rows</code></pre>
+<pre class="r"><code>fullnamesmin[fullnamesmin$fulltotal == min(fullnamesmin$fulltotal), 
+    ]</code></pre>
+<pre><code>## # A tibble: 4 x 8
+## # Groups:   name [1]
+##   name   year sex         prop male_share female_share    gap fulltotal
+##   &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+## 1 Aeon   1997 M     0.0000025       0.465        0.535 0.0703      105.
+## 2 Aeon   2010 F     0.00000255      0.465        0.535 0.0703      105.
+## 3 Aeon   2013 F     0.0000026       0.465        0.535 0.0703      105.
+## 4 Aeon   2014 F     0.00000256      0.465        0.535 0.0703      105.</code></pre>
+<p>Median for each name for each numeric variable</p>
+<pre class="r"><code>fullnamesmedian</code></pre>
+<pre><code>##   year     prop male_share female_share       gap fulltotal
+## 1 1986 7.68e-06  0.5077381    0.4922619 0.1721365  1210.955</code></pre>
+<p>Standard Deviation for each name in each numeric variable.</p>
+<pre class="r"><code>fullnamessd &lt;- fullnamessd %&gt;% select(name, year, prop, male_share, 
+    female_share, gap, fulltotal)
+
+fullnamessd</code></pre>
+<pre><code>## # A tibble: 919 x 7
+##    name     year        prop male_share female_share   gap fulltotal
+##    &lt;chr&gt;   &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Aalijah  6.11 0.00000199           0            0     0      4.05
+##  2 Aamari   4.75 0.00000129           0            0     0      2.68
+##  3 Aarin   11.5  0.00000344           0            0     0      7.03
+##  4 Aaryn   12.4  0.00000667           0            0     0     13.2 
+##  5 Abrar    8.55 0.00000339           0            0     0      6.64
+##  6 Adair   31.4  0.00000828           0            0     0     18.2 
+##  7 Adama   12.4  0.00000290           0            0     0      5.91
+##  8 Adel    35.5  0.00000778           0            0     0     10.7 
+##  9 Adi     12.2  0.00000468           0            0     0      9.70
+## 10 Adisa   11.8  0.000000853          0            0     0      1.53
+## # ... with 909 more rows</code></pre>
+<p>Variance in each numeric variable grouped by name:</p>
+<pre class="r"><code>fullnamesvar &lt;- fullnamesvar %&gt;% select(name, year, prop, male_share, 
+    female_share, gap, fulltotal)
+
+fullnamesvar</code></pre>
+<pre><code>## # A tibble: 919 x 7
+##    name      year     prop male_share female_share   gap fulltotal
+##    &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Aalijah   37.4 3.98e-12          0            0     0     16.4 
+##  2 Aamari    22.5 1.68e-12          0            0     0      7.18
+##  3 Aarin    133.  1.18e-11          0            0     0     49.4 
+##  4 Aaryn    153.  4.45e-11          0            0     0    174.  
+##  5 Abrar     73.0 1.15e-11          0            0     0     44.1 
+##  6 Adair    988.  6.86e-11          0            0     0    331.  
+##  7 Adama    153.  8.43e-12          0            0     0     35.0 
+##  8 Adel    1262.  6.06e-11          0            0     0    115.  
+##  9 Adi      149.  2.19e-11          0            0     0     94.1 
+## 10 Adisa    139.  7.27e-13          0            0     0      2.33
+## # ... with 909 more rows</code></pre>
+<p>Names with a majority male representation</p>
+<pre class="r"><code>Mennames</code></pre>
+<pre><code>##       name year sex      prop male_share female_share       gap fulltotal
+## 1  Aalijah 2007   F 3.780e-06  0.5851041    0.4148959 0.1702082  235.3348
+## 2  Aalijah 2002   F 4.560e-06  0.5851041    0.4148959 0.1702082  236.3348
+## 3  Aalijah 2007   M 4.520e-06  0.5851041    0.4148959 0.1702082  237.3348
+## 4  Aalijah 2016   M 5.450e-06  0.5851041    0.4148959 0.1702082  238.3348
+## 5  Aalijah 2014   M 1.027e-05  0.5851041    0.4148959 0.1702082  248.3348
+## 6  Aalijah 2009   M 5.660e-06  0.5851041    0.4148959 0.1702082  239.3348
+## 7  Aalijah 2015   M 8.340e-06  0.5851041    0.4148959 0.1702082  244.3348
+## 8  Aalijah 2009   F 3.460e-06  0.5851041    0.4148959 0.1702082  234.3348
+## 9  Aalijah 2004   F 2.980e-06  0.5851041    0.4148959 0.1702082  233.3348
+## 10 Aalijah 2008   F 2.400e-06  0.5851041    0.4148959 0.1702082  232.3348
+## 11 Aalijah 1994   F 2.570e-06  0.5851041    0.4148959 0.1702082  232.3348
+## 12 Aalijah 2011   M 7.390e-06  0.5851041    0.4148959 0.1702082  242.3348
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 34075 rows ]</code></pre>
+<p>Names with a majority female representation:</p>
+<pre class="r"><code>Womennames</code></pre>
+<pre><code>##     name year sex      prop male_share female_share       gap fulltotal
+## 1  Aaryn 2005   M 8.940e-06  0.3922514    0.6077486 0.2154972  1410.675
+## 2  Aaryn 1985   M 4.680e-06  0.3922514    0.6077486 0.2154972  1400.675
+## 3  Aaryn 1994   M 7.360e-06  0.3922514    0.6077486 0.2154972  1406.675
+## 4  Aaryn 2009   M 1.227e-05  0.3922514    0.6077486 0.2154972  1417.675
+## 5  Aaryn 2006   M 1.278e-05  0.3922514    0.6077486 0.2154972  1419.675
+## 6  Aaryn 2001   F 1.162e-05  0.3922514    0.6077486 0.2154972  1414.675
+## 7  Aaryn 2011   M 9.860e-06  0.3922514    0.6077486 0.2154972  1411.675
+## 8  Aaryn 1979   M 2.790e-06  0.3922514    0.6077486 0.2154972  1396.675
+## 9  Aaryn 1977   F 6.080e-06  0.3922514    0.6077486 0.2154972  1401.675
+## 10 Aaryn 1987   F 1.227e-05  0.3922514    0.6077486 0.2154972  1414.675
+## 11 Aaryn 1992   F 6.490e-06  0.3922514    0.6077486 0.2154972  1404.675
+## 12 Aaryn 2012   F 1.653e-05  0.3922514    0.6077486 0.2154972  1423.675
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 31790 rows ]</code></pre>
+<p>The Name with the greatest male representation can be determined using this table</p>
+<pre class="r"><code>mostmalename</code></pre>
+<pre><code>##       name year sex      prop male_share female_share       gap fulltotal
+## 1  Aalijah 2007   F 3.780e-06  0.5851041    0.4148959 0.1702082  235.3348
+## 2  Aalijah 2002   F 4.560e-06  0.5851041    0.4148959 0.1702082  236.3348
+## 3  Aalijah 2007   M 4.520e-06  0.5851041    0.4148959 0.1702082  237.3348
+## 4  Aalijah 2016   M 5.450e-06  0.5851041    0.4148959 0.1702082  238.3348
+## 5  Aalijah 2014   M 1.027e-05  0.5851041    0.4148959 0.1702082  248.3348
+## 6  Aalijah 2009   M 5.660e-06  0.5851041    0.4148959 0.1702082  239.3348
+## 7  Aalijah 2015   M 8.340e-06  0.5851041    0.4148959 0.1702082  244.3348
+## 8  Aalijah 2009   F 3.460e-06  0.5851041    0.4148959 0.1702082  234.3348
+## 9  Aalijah 2004   F 2.980e-06  0.5851041    0.4148959 0.1702082  233.3348
+## 10 Aalijah 2008   F 2.400e-06  0.5851041    0.4148959 0.1702082  232.3348
+## 11 Aalijah 1994   F 2.570e-06  0.5851041    0.4148959 0.1702082  232.3348
+## 12 Aalijah 2011   M 7.390e-06  0.5851041    0.4148959 0.1702082  242.3348
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 34075 rows ]</code></pre>
+<p>The Name with the greatest female representation can be determined using this table</p>
+<pre class="r"><code>mostfemalename</code></pre>
+<pre><code>##     name year sex      prop male_share female_share       gap fulltotal
+## 1  Aaryn 2005   M 8.940e-06  0.3922514    0.6077486 0.2154972  1410.675
+## 2  Aaryn 1985   M 4.680e-06  0.3922514    0.6077486 0.2154972  1400.675
+## 3  Aaryn 1994   M 7.360e-06  0.3922514    0.6077486 0.2154972  1406.675
+## 4  Aaryn 2009   M 1.227e-05  0.3922514    0.6077486 0.2154972  1417.675
+## 5  Aaryn 2006   M 1.278e-05  0.3922514    0.6077486 0.2154972  1419.675
+## 6  Aaryn 2001   F 1.162e-05  0.3922514    0.6077486 0.2154972  1414.675
+## 7  Aaryn 2011   M 9.860e-06  0.3922514    0.6077486 0.2154972  1411.675
+## 8  Aaryn 1979   M 2.790e-06  0.3922514    0.6077486 0.2154972  1396.675
+## 9  Aaryn 1977   F 6.080e-06  0.3922514    0.6077486 0.2154972  1401.675
+## 10 Aaryn 1987   F 1.227e-05  0.3922514    0.6077486 0.2154972  1414.675
+## 11 Aaryn 1992   F 6.490e-06  0.3922514    0.6077486 0.2154972  1404.675
+## 12 Aaryn 2012   F 1.653e-05  0.3922514    0.6077486 0.2154972  1423.675
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 31790 rows ]</code></pre>
+<p>Overall, based on a cursory analysis of this data and summary statistics, it appears that there are no significant findings. For example, according to the correlation matrix above, aside from male and female proportions being inversely related, there are no meaningful correlations. This is because all of the correllations shown are low.</p>
+<p>However, this analysis is not completely pointless. Based on this data, it can be determined that Aaryn is the most common unisex female name and that Aalijah is the most common unisex male name. Additionally, it appears that there is very little variance in proportion between names. This indicates that all of the names are equally likely to be seen in the population. This is reasonable because there is a very large possible list of names to pick from. Additionally, there is no true advantage that having a certain name will grant. Finally based on this data, the most common unisex names overall wwere Jessie, Ollie, and Tommie. In direct contrast, the least common name was Aeon. Although there are some interesting findings in this data, it appears, based on early analysis, that associations between the variables measured are not among them. To clarify and illustrate this, the data was visualized.</p>
+</div>
+<div id="visualization" class="section level3">
+<h3>Visualization</h3>
+<p>To further analyze this data, a correlation heat map was created using the code below</p>
+<pre class="r"><code># generation of the correlation heatmap.
+ggplot(data = melted_cormat, aes(Var2, Var1, fill = value)) + 
+    geom_tile(color = &quot;white&quot;) + scale_fill_gradient2(low = &quot;blue&quot;, 
+    high = &quot;red&quot;, mid = &quot;white&quot;, midpoint = 0, limit = c(-1, 
+        1), space = &quot;Lab&quot;, name = &quot;Correlation&quot;) + theme_minimal() + 
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, size = 12, 
+        hjust = 1)) + coord_fixed() + geom_text(aes(label = round(value, 
+    2))) + ggtitle(&quot;Correlation Heatmap&quot;)</code></pre>
+<p><img src="/compbioprojectone_files/figure-html/unnamed-chunk-19-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Based on this heat map and the correlation matrix depicted above, It is clear that there is no significant correlation between most of the variables. The strongest correlation appears between male and female proportion. However, this is not relevant correlation because these two proportions are inversely related due to the binary nature of biological sex in human beings. The other significant correlation occurs between the proportion of a unisex name in the population (prop) and the total number of unisex named individuals in the population (fulltotal). This is expected because thise two variables are directly related. To elaborate, as the total number of unisex named individuals rises, their proportion in the total population also rises. Therefore, this correlation is not relevant either.</p>
+<p>Next, a jitterplot was created to better visualize the effect that time has on the total number of individuals with unisex names.To better visualize this data, a random sample of 5oo was taken from the larger data to be used for this graph. If the whole dataset were used, the graph would be illegible.</p>
+<pre class="r"><code>smalldata1 &lt;- fullnames2 %&gt;% sample_n(500)
+
+# jitterplot creation
+jplot &lt;- ggplot(smalldata1, aes(year, fulltotal, color = sex, 
+    stat = &quot;summary&quot;)) + geom_point() + geom_smooth(method = &quot;lm&quot;, 
+    se = F) + labs(subtitle = &quot;Unisex Names vs Time&quot;, y = &quot;Total individuals&quot;, 
+    x = &quot;Time (Year)&quot;, title = &quot;Scatterplot with overlapping points&quot;) + 
+    scale_x_continuous(breaks = c(1880, 1900, 1920, 1940, 1960, 
+        1980, 2000), labels = c(&quot;1880&quot;, &quot;1900&quot;, &quot;1920&quot;, &quot;1940&quot;, 
+        &quot;1960&quot;, &quot;1980&quot;, &quot;2000&quot;)) + theme_set(theme_dark())
+
+jplot</code></pre>
+<p><img src="/compbioprojectone_files/figure-html/unnamed-chunk-20-1.png" width="672" style="display: block; margin: auto;" />
+Based on this plot, it appears that the total number of individuals with unisex names is slightly negatively correlated with time. This may provide evidence in favor of a decline in popularity for unisex names. However, because the total number of individuals was already shown to be weakly correllated with time based on the previously created correlation matrix, This apparent result is not reliable. Additionally, this correlation is shown to be weak on this graph as well. Keeping both of these visualizations in mind, it is safe to assume that there is no significant association between time and the total number of individuals with unisex names.</p>
+<p>Next, a time series chart was created to better visualize how the difference in unisex naming between males and females has progressed over time.</p>
+<pre class="r"><code># Time Series Chart
+
+smalldata1 &lt;- fullnames2[1:500, ]
+wplot &lt;- ggplot(smalldata1, aes(x = year)) + geom_line(aes(y = fulltotal, 
+    color = sex)) + labs(title = &quot;Time Series Chart&quot;, subtitle = &quot;changes in unisex naming&quot;, 
+    y = &quot;Difference between males and females&quot;) + theme_set(theme_dark())
+
+wplot</code></pre>
+<p><img src="/compbioprojectone_files/figure-html/unnamed-chunk-21-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>This graph appears chaotic at first glance. Before describing the results, it is important to note that each point on this graph represents one individual, not one name. Despite this graph’s apparent chaos, it does demonstrate one key finding; unisex naming between males and females was fairly consistent until around 1970. After this time, unisex naming began to vary significantly, producing the chaos observed here. Possible changes in social norms could be responsible for this change but more research is required to confirm this.</p>
+</div>
+<div id="dimensionality-reduction" class="section level3">
+<h3>Dimensionality Reduction</h3>
+<p>Next, clustering using k-means was performed on the variables “male_share”, “female_share”, and “year” in relation to the total number of people with unisex names.</p>
+<pre class="r"><code># kmeans calculation
+fullnamenumbers &lt;- fullnamesnum %&gt;% select(-name)
+kmeansn &lt;- fullnamenumbers %&gt;% kmeans(3)
+kmeansn$size</code></pre>
+<pre><code>## [1]  2070  4003 59816</code></pre>
+<p>Based on this result, cluster two is far larger than the other clusters. Reasons for this discrepancy will be discussed further later.</p>
+<pre class="r"><code># kmeans plot creation
+fullnamenums2 &lt;- fullnamesnum %&gt;% mutate(cluster = as.factor(kmeansn$cluster))
+
+fullnamenums2 %&gt;% ggplot(aes(male_share, fulltotal, color = cluster)) + 
+    geom_point() + xlab(&quot;Proportion of Males&quot;) + ylab(&quot;Total Individuals&quot;)</code></pre>
+<p><img src="/compbioprojectone_files/figure-html/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fullnamenums2 %&gt;% ggplot(aes(female_share, fulltotal, color = cluster)) + 
+    geom_point() + xlab(&quot;Proportion of Females&quot;) + ylab(&quot;Total Individuals&quot;)</code></pre>
+<p><img src="/compbioprojectone_files/figure-html/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>fullnamenums2 %&gt;% ggplot(aes(gap, fulltotal, color = cluster)) + 
+    geom_point() + xlab(&quot;Gap between Male and Female Proportions&quot;) + 
+    ylab(&quot;Total Individuals&quot;)</code></pre>
+<p><img src="/compbioprojectone_files/figure-html/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>Through all three of these graphs and kmeans analyses, cluster 2 appears to be the largest. This cluster appears near the base of the graph. It is present here because most names are not heavily represented in the population. Therefore, the majority of the names will be represented in low quantities, which is what occurs here. Additionally, all of the clusters appear to be separated more so by their distance in “total individuals” rather than by their distance in male-to-female proportion gap, or the male and female proportions in general. This indicates that the proportions of males and females with unisex names is not relevant for clustering, implying an even distribution for these variables. Also, the sizes of clusters 1 and 3 pale in comparison to 2. Clusters 1 and 3 likely represent more popular unisex names than 2 due to their greater representation in the population.</p>
+</div>
+</div>
+
+              <hr>
+              <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div>
+            </div>
+          </div>
+          <hr>
+        <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+        </div>
+      </div>
+      
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MathewPortfolior</title>
+    <link>/</link>
+    <description>Recent content on MathewPortfolior</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 15 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>Projects Here are some projects I have recently completed:
+  Exploratory Data Analysis with Tidyverse Tools
+  Modeling, Testing, and Classification
+  </description>
+    </item>
+    
+    <item>
+      <title>R and Python Can Work Together!</title>
+      <link>/blog/r-and-python-can-work-together/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/r-and-python-can-work-together/</guid>
+      <description>R can work with python to achieve a variety of goals in convenient ways. For example, below is a short nucleotide sequence that we will define in R as “dnaseq”.
+#this is a R code chunklibrary(reticulate)## Warning: package &amp;#39;reticulate&amp;#39; was built under R version 3.6.3dnaseq &amp;lt;- &amp;quot;ATGGCAATAACCCCCCGTTTCTACTTCTAGAGGAGAAAAGTATTGACATGAGCGCTCCCGGCACAAGGGCCAAAGAAGTCTCCAATTTCTTATTTCCGAATGACATGCGTCTCCTTGCGGGTAAATCACCGACCGCAATTCATAGAAGCCTGGGGGAACAGATAGGTCTAATTAGCTTAAGAGAGTAAATCCTGGGATCATTCAGTAGTAACCATAAACTTACGCTGGGCGCGCTTATAG&amp;quot;#your code hereUsing Python, we are able to determine the length of the sequence and save it as the variable “lon”.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/compbioprojectone/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/compbioprojectone/</guid>
+      <description>Project 1: Exploratory Data Analysisauthor: Abraham Joshua Mathewuteid: ajm5874date: ’3/16/20IntroductionIn this project, the dataset “babynames” was imported and combined with the dataset “unisex_names”. By comparing these two datasets, it is possible to analyze the history of unisex names in america, including how common they are, the distribution of the names across sex, and their changes in popularity over the years.
+For some background the dataset “babynames”, it was provided by the social security administration and it contains all names with at least 5 uses from as early as 1880.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Statistical Analysis</title>
+      <link>/compbioproject2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/compbioproject2/</guid>
+      <description>Abraham Joshua MathewIntroductionFor this project, I chose data focused on the perceived height and weight of individuals. It contains the biological sex, actual height (cm) and weight (kg), and reported height(cm) and weight(kg) of each individual enrolled in the study. Additionally, each participant was assigned an ID number. There are 200 observations total in this study.
+Performing MANOVATo determine the role of “Biological Sex” in determing “Reported Weight”, “Actual Weight”, “Reported Height”, and “Actual Height” a MANOVA test was performed below.</description>
+    </item>
+    
+  </channel>
+</rss>

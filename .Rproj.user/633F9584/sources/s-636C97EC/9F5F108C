@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1589583084105.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "9F5F108C",
+    "lastKnownWriteTime" : 1589595541,
+    "last_content_update" : 1589595541944,
+    "path" : "~/Website/content/blog/2020-05-15-r-and-python-can-work-together.Rmd",
+    "project_path" : "content/blog/2020-05-15-r-and-python-can-work-together.Rmd",
+    "properties" : {
+        "cursorPosition" : "18,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

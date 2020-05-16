@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on MathewPortfolior</title>
+    <link>/blog/</link>
+    <description>Recent content in Blogs on MathewPortfolior</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Fri, 15 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>R and Python Can Work Together!</title>
+      <link>/blog/r-and-python-can-work-together/</link>
+      <pubDate>Fri, 15 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/r-and-python-can-work-together/</guid>
+      <description>R can work with python to achieve a variety of goals in convenient ways. For example, below is a short nucleotide sequence that we will define in R as “dnaseq”.
+#this is a R code chunklibrary(reticulate)## Warning: package &amp;#39;reticulate&amp;#39; was built under R version 3.6.3dnaseq &amp;lt;- &amp;quot;ATGGCAATAACCCCCCGTTTCTACTTCTAGAGGAGAAAAGTATTGACATGAGCGCTCCCGGCACAAGGGCCAAAGAAGTCTCCAATTTCTTATTTCCGAATGACATGCGTCTCCTTGCGGGTAAATCACCGACCGCAATTCATAGAAGCCTGGGGGAACAGATAGGTCTAATTAGCTTAAGAGAGTAAATCCTGGGATCATTCAGTAGTAACCATAAACTTACGCTGGGCGCGCTTATAG&amp;quot;#your code hereUsing Python, we are able to determine the length of the sequence and save it as the variable “lon”.</description>
+    </item>
+    
+  </channel>
+</rss>
